@@ -67,6 +67,50 @@ void printTreeInHerarchy(Node *_root) {
 	}
 }
 
+void printTreeInHerarchyByRecursiving(Queue *_q) {
+	Queue q;
+	Queue *qIndex = NULL;
+
+	q.next = NULL;
+
+	if (NULL == _q)
+		return ;
+
+	while(NULL != _q) {
+		if (NULL != _q->node->lchild) {
+			qIndex = createQueueNode(_q->node->lchild);
+			if (NULL != qIndex) {
+				qIndex->next = q.next;
+				q.next = qIndex;
+			}
+		}
+		if (NULL != _q->node->rchild) {
+			qIndex = createQueueNode(_q->node->rchild);
+			if (NULL != qIndex) {
+				qIndex->next = q.next;
+				q.next = qIndex;
+			}
+		}
+		printf("%d ", _q->node->value);
+		qIndex = _q;
+		_q = _q->next;
+
+		free(qIndex);
+	}
+	printf("\n");
+	printTreeInHerarchyByRecursiving(q.next);
+}
+
+	
+
+void printTreeInHerarchyByRecursion(Node *_root) {
+	Queue *q = createQueueNode(_root);
+	if(NULL != q)
+		printTreeInHerarchyByRecursiving(q);
+}
+	
+
+
 
 int main(int argc, char **args) {
 	int tree[] = { 1, 2, 3, 0, 5, 6, 7, 8 };
@@ -80,6 +124,8 @@ int main(int argc, char **args) {
 	printf("\n");
 
 	printTreeInHerarchy(root);
+	printf("\n\n");
+	printTreeInHerarchyByRecursion(root);
 
 	releaseTree(root);
 	return 0;
