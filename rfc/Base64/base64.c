@@ -1,5 +1,14 @@
-// author: Mard Yu<michealyxd@hotmail.com>
-// accord to rfc4648
+/*
+* base64.c: accord to rfc4648 implements base64
+*
+* Authors:
+* mardyu<michealyxd@hotmail.com>
+*
+* Copyright 2016 mardyu<michealyxd@hotmail.com>
+* Licensed under the MIT license. See LICENSE file in the project root for full license information.
+*/
+
+#include "base64.h"
 
 #include <string.h>
 
@@ -10,6 +19,9 @@ static char const pad = '=';
 #define BASE64_UNIT_LEN 4
 #define BASE64_UNIT_LEN_MASK (BASE64_UNIT_LEN - 1)
 #define BASE64_CEIL(num) ((num + BASE64_UNIT_LEN_MASK) & ~BASE64_UNIT_LEN_MASK)
+
+static int _base64_encode(const char *in, const int len_in, char *out, const int len_out, const char *base_ab);
+static int _base64_decode(const char *in, const int len_in, char *out, const int len_out, const char *base_ab);
 
 int base64_encode(const char *in, const int len_in, char *out, const int len_out)
 {
