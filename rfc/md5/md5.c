@@ -1,15 +1,19 @@
+/*
+* md5.c: accord to rfc 1321 implements md5
+*
+* Authors:
+* mardyu<michealyxd@hotmail.com>
+*
+* Copyright 2016 mardyu<michealyxd@hotmail.com>
+* Licensed under the MIT license. See LICENSE file in the project root for full license information.
+*/
 
-
-
-// accord to rfc 1321 implements md5
-// author: mardyu<michealyxd@hotmail.com>
+#include "md5.h"
 
 #include <string.h>
 
-#define LEN_MODER 0x40
-#define LEN_MASK (LEN_MODER - 1)
-
 #define LEN_LEFT 56
+#define LEN_RESULT 16
 
 #define WORD_A 0x67452301
 #define WORD_B 0xefcdab89
@@ -46,6 +50,14 @@ unsigned int T[] =
 
 #define ROUND_4(a, b, c, d, k, s, i, x) \
 	a = b + ROTATING_SHIFT((a + I(b, c, d) + x[k] + T[i]), s)
+
+static const U8 _PAD[LEN_MODER] =
+{
+	0x80, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+};
 
 
 static void _append_padding(
@@ -272,45 +284,215 @@ static void _process(
 }
 
 
-
-int md5(const char *input, const int len_input, char *output, const int len_output)
+static void _md5_update(struct md5_context *context, const U8 *block, U32 len_block)
 {
-	if (len_output < 16)
-		return -1;
+	U32 a = context->abcd[0];
+	U32 b = context->abcd[1];
+	U32 c = context->abcd[2];
+	U32 d = context->abcd[3];
 
-	char pad[LEN_MODER * 2];
-	int len_pad = LEN_MODER * 2;
-	memset(pad, 0, len_pad);
-	int len_in = len_input;
+	U32 block_index;
+	U32 X[16];
+	U32 *in;
+	U32 aa;
+	U32 bb;
+	U32 cc;
+	U32 dd;
 
-	char *result = output;
-	_append_padding(input, len_in, pad, len_pad, &len_in, &len_pad);
-	_append_length(pad + len_pad, len_input);
-	_process(input, len_in, pad, len_pad > LEN_MODER ? 2 * LEN_MODER : LEN_MODER
-		, result, result + 4, result + 8, result + 12);
+	for (block_index = 0; block_index < len_block; block_index += LEN_MODER)
+	{
+		aa = a;
+		bb = b;
+		cc = c;
+		dd = d;
 
-	return 0;
-}
+		in = (U32 *)(block + block_index);
+		for (int j = 0; j < 16; j++)
+			X[j] = in[j];
 
-int tohex(const char *input, const int len_input, char *output, const int len_output)
-{
-	if (len_output < len_input * 2)
-		return -1;
+		ROUND_1(a, b, c, d, 0, 7, 1, X);
+		ROUND_1(d, a, b, c, 1, 12, 2, X);
+		ROUND_1(c, d, a, b, 2, 17, 3, X);
+		ROUND_1(b, c, d, a, 3, 22, 4, X);
+		ROUND_1(a, b, c, d, 4, 7, 5, X);
+		ROUND_1(d, a, b, c, 5, 12, 6, X);
+		ROUND_1(c, d, a, b, 6, 17, 7, X);
+		ROUND_1(b, c, d, a, 7, 22, 8, X);
+		ROUND_1(a, b, c, d, 8, 7, 9, X);
+		ROUND_1(d, a, b, c, 9, 12, 10, X);
+		ROUND_1(c, d, a, b, 10, 17, 11, X);
+		ROUND_1(b, c, d, a, 11, 22, 12, X);
+		ROUND_1(a, b, c, d, 12, 7, 13, X);
+		ROUND_1(d, a, b, c, 13, 12, 14, X);
+		ROUND_1(c, d, a, b, 14, 17, 15, X);
+		ROUND_1(b, c, d, a, 15, 22, 16, X);
 
-	char low;
-	char high;
-	for (int i = 0; i < len_input; i++) {
-		high = 0xf & input[i];
-		low = (0xf0 & input[i]) >> 4;
-		if (low >= 10)
-			output[i * 2] = 'a' + low - 10;
-		else
-			output[i * 2] = '0' + low;
-		if (high >= 10)
-			output[i * 2 + 1] = 'a' + high - 10;
-		else
-			output[i * 2 + 1] = '0' + high;
+		ROUND_2(a, b, c, d, 1, 5, 17, X);
+		ROUND_2(d, a, b, c, 6, 9, 18, X);
+		ROUND_2(c, d, a, b, 11, 14, 19, X);
+		ROUND_2(b, c, d, a, 0, 20, 20, X);
+		ROUND_2(a, b, c, d, 5, 5, 21, X);
+		ROUND_2(d, a, b, c, 10, 9, 22, X);
+		ROUND_2(c, d, a, b, 15, 14, 23, X);
+		ROUND_2(b, c, d, a, 4, 20, 24, X);
+		ROUND_2(a, b, c, d, 9, 5, 25, X);
+		ROUND_2(d, a, b, c, 14, 9, 26, X);
+		ROUND_2(c, d, a, b, 3, 14, 27, X);
+		ROUND_2(b, c, d, a, 8, 20, 28, X);
+		ROUND_2(a, b, c, d, 13, 5, 29, X);
+		ROUND_2(d, a, b, c, 2, 9, 30, X);
+		ROUND_2(c, d, a, b, 7, 14, 31, X);
+		ROUND_2(b, c, d, a, 12, 20, 32, X);
+
+		ROUND_3(a, b, c, d, 5, 4, 33, X);
+		ROUND_3(d, a, b, c, 8, 11, 34, X);
+		ROUND_3(c, d, a, b, 11, 16, 35, X);
+		ROUND_3(b, c, d, a, 14, 23, 36, X);
+		ROUND_3(a, b, c, d, 1, 4, 37, X);
+		ROUND_3(d, a, b, c, 4, 11, 38, X);
+		ROUND_3(c, d, a, b, 7, 16, 39, X);
+		ROUND_3(b, c, d, a, 10, 23, 40, X);
+		ROUND_3(a, b, c, d, 13, 4, 41, X);
+		ROUND_3(d, a, b, c, 0, 11, 42, X);
+		ROUND_3(c, d, a, b, 3, 16, 43, X);
+		ROUND_3(b, c, d, a, 6, 23, 44, X);
+		ROUND_3(a, b, c, d, 9, 4, 45, X);
+		ROUND_3(d, a, b, c, 12, 11, 46, X);
+		ROUND_3(c, d, a, b, 15, 16, 47, X);
+		ROUND_3(b, c, d, a, 2, 23, 48, X);
+
+		ROUND_4(a, b, c, d, 0, 6, 49, X);
+		ROUND_4(d, a, b, c, 7, 10, 50, X);
+		ROUND_4(c, d, a, b, 14, 15, 51, X);
+		ROUND_4(b, c, d, a, 5, 21, 52, X);
+		ROUND_4(a, b, c, d, 12, 6, 53, X);
+		ROUND_4(d, a, b, c, 3, 10, 54, X);
+		ROUND_4(c, d, a, b, 10, 15, 55, X);
+		ROUND_4(b, c, d, a, 1, 21, 56, X);
+		ROUND_4(a, b, c, d, 8, 6, 57, X);
+		ROUND_4(d, a, b, c, 15, 10, 58, X);
+		ROUND_4(c, d, a, b, 6, 15, 59, X);
+		ROUND_4(b, c, d, a, 13, 21, 60, X);
+		ROUND_4(a, b, c, d, 4, 6, 61, X);
+		ROUND_4(d, a, b, c, 11, 10, 62, X);
+		ROUND_4(c, d, a, b, 2, 15, 63, X);
+		ROUND_4(b, c, d, a, 9, 21, 64, X);
+
+		a += aa;
+		b += bb;
+		c += cc;
+		d += dd;
 	}
 
-	return 0;
+	context->abcd[0] = a;
+	context->abcd[1] = b;
+	context->abcd[2] = c;
+	context->abcd[3] = d;
 }
+
+
+int md5_init(struct md5_context *context)
+{
+	if (!context)
+		return MD5_CONTEXT_NULL;
+	context->len = 0;
+	context->offset = 0;
+	context->abcd[0] = WORD_A;
+	context->abcd[1] = WORD_B;
+	context->abcd[2] = WORD_C;
+	context->abcd[3] = WORD_D;
+
+	return MD5_OK;
+}
+
+int md5_update(struct md5_context *context, const char *in, const int len_in)
+{
+	if (!context)
+		return MD5_CONTEXT_NULL;
+	if (in) {
+		U32 l = len_in;
+		context->len += ((U64)l) << 3;
+		if (context->offset != 0 && context->offset + l > LEN_MODER) {
+			int cpycount = LEN_MODER - context->offset;
+			memcpy(context->block + context->offset, in, cpycount);
+			_md5_update(context, context->block, LEN_MODER);
+			in += cpycount;
+			l -= cpycount;
+			context->offset = 0;
+		}
+
+		if (context->offset == 0) {
+			if (l > LEN_MODER) {
+				_md5_update(context, in, l &(~LEN_MASK));
+				in += l &(~LEN_MASK);
+				l -= l &(~LEN_MASK);
+			}
+		}
+
+		if (l > 0) {
+			memcpy(context->block, in, l);
+			context->offset = l;
+		}
+	}
+	else {
+		if (context->offset + LEN_U64 + 1 <= LEN_MODER) {
+			memcpy(context->block + context->offset, _PAD, LEN_MODER - context->offset - LEN_U64);
+		}
+		else {
+			memcpy(context->block + context->offset, _PAD, LEN_MODER - context->offset);
+			_md5_update(context, context->block, LEN_MODER);
+			memset(context->block, 0, LEN_MODER);
+		}
+
+		U8 *last = context->block + LEN_MODER - LEN_U64;
+		U64 l = context->len;
+		*last++ = (l) & 0xff;
+		*last++ = (l >> 8) & 0xff;
+		*last++ = (l >> 16) & 0xff;
+		*last++ = (l >> 24) & 0xff;
+		*last++ = (l >> 32) & 0xff;
+		*last++ = (l >> 40) & 0xff;
+		*last++ = (l >> 48) & 0xff;
+		*last++ = (l >> 56) & 0xff;
+		
+		_md5_update(context, context->block, LEN_MODER);
+	}
+
+	return MD5_OK;
+}
+
+int md5_final(struct md5_context *context, char *out, const int len_out)
+{
+	if (!context)
+		return MD5_CONTEXT_NULL;
+	if (len_out < LEN_RESULT)
+		return MD5_LEN_ERROR;
+	int ret = md5_update(context, NULL, 0);
+	if (ret != MD5_OK)
+		return ret;
+	U32 abcd;
+	int i;
+	for (i = 0; i < 4; i++) {
+		abcd = context->abcd[i];
+		*out++ = (abcd) & 0xff;
+		*out++ = (abcd >> 8) & 0xff;
+		*out++ = (abcd >> 16) & 0xff;
+		*out++ = (abcd >> 24) & 0xff;
+	}
+
+	return MD5_OK;
+}
+
+int md5(const char *in, const int len_in, char *out, const int len_out)
+{
+	if (len_out < LEN_RESULT)
+		return MD5_LEN_ERROR;
+
+	struct md5_context c;
+	md5_init(&c);
+	md5_update(&c, in, len_in);
+	md5_final(&c, out, len_out);
+
+	return MD5_OK;
+}
+
