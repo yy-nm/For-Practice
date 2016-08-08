@@ -1,20 +1,26 @@
 
+/*
+* sha1.h: accord to rfc 3174 implements sha1
+*
+* Authors:
+* mardyu<michealyxd@hotmail.com>
+*
+* Copyright 2016 mardyu<michealyxd@hotmail.com>
+* Licensed under the MIT license. See LICENSE file in the project root for full license information.
+*/
+
 #ifndef _SHA1_H_
 #define _SHA1_H_
 
-///*
 #ifdef __cplusplus
 extern "C" {
 #endif
-//*/
 
-// sha1 accord to rfc3174
-// author: mardyu<michealyxd@hotmail.com>
-// date: 2016-05-12 
 
 #include <stdint.h>
 
 #define LEN_BLOCK 64
+#define LEN_BLOCK_MASK (LEN_BLOCK - 1)
 #define LEN_RESULT 20
 #define LEN_U32 4
 #define LEN_U64 8
@@ -48,9 +54,9 @@ int sha1_final(struct sha1_context *context, char *out, const int len_out);
 // handle with some string which can read all in once
 int sha1(const char *input, const int len_input, char *output, const int len_output);
 
-///*
+
 #ifdef __cplusplus
 }
 #endif
-//*/
+
 #endif
