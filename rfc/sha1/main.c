@@ -24,7 +24,8 @@ int tohex(const char *input, const int len_input, char *output, const int len_ou
 
 	char low;
 	char high;
-	for (int i = 0; i < len_input; i++) {
+	int i;
+	for (i = 0; i < len_input; i++) {
 		high = 0xf & input[i];
 		low = (0xf0 & input[i]) >> 4;
 		if (low >= 10)
@@ -84,4 +85,5 @@ int main(void) {
 	show[40] = '\0';
 
 	printf("SHA1(): %s\n", show);
+	return 0;
 }
