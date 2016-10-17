@@ -5,6 +5,7 @@
 *
 * History:
 * - 2016-10-11 finish bubbly sort
+* - 2016-10-17 finish selection sort
 *
 * Authors:
 * mardyu<michealyxd@hotmail.com>
@@ -148,6 +149,8 @@ static int _sort (sort_item_t **items, size_t size, size_t unit_size, sort_compa
 	return ret;
 }
 
+/* implements ************************************************/
+
 static int _bubbly_sort(sort_item_t **items, size_t size, size_t unit_size, sort_comparer compare, sort_item_t *tmp)
 {
 	sort_item_t *l, *r;
@@ -170,8 +173,46 @@ static int _bubbly_sort(sort_item_t **items, size_t size, size_t unit_size, sort
 	return 0;
 }
 
+static int _selection_sort(sort_item_t **items, size_t size, size_t unit_size, sort_comparer compare, sort_item_t *tmp)
+{
+	sort_item_t *min, *nor;
+	int min_index;
+	int i;
+	int j;
+	for (i = 0; i < size; i++) {
+		min = STEPN(items, unit_size, i, sort_item_t);
+		min_index = i;
+		for (j = i + 1; j < size; j++) {
+			tmp = STEPN(items, unit_size, j, sort_item_t);
+			if ((*compare)(min, tmp) < 0) {
+				min_index = j;
+				min = STEPN(items, unit_size, min_index, sort_item_t);
+			}
+		}
+
+		if (min_index != i) {
+			nor = STEPN(items, unit_size, i, sort_item_t);
+			min = STEPN(items, unit_size, min_index, sort_item_t);
+
+			_copy_value(tmp, min, unit_size);
+			_copy_value(min, nor, unit_size);
+			_copy_value(nor, tmp, unit_size);
+		}
+	}
+
+	return 0;
+}
+
+
+/* wrapper ************************************************/
+
 int bubbly_sort(sort_item_t **items, size_t size, size_t unit_size, sort_comparer compare)
 {
 	return _sort(items, size, unit_size, compare, _bubbly_sort);
+}
+
+int selection_sort(sort_item_t **items, size_t size, size_t unit_size, sort_comparer compare)
+{
+	return _selection_sort(items, size, unit_size, compare, _selection_sort);
 }
 
