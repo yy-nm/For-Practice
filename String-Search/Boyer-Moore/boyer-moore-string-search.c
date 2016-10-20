@@ -6,6 +6,9 @@
 * Authors:
 * mardyu<michealyxd@hotmail.com>
 *
+* History:
+* 2016-10-20: fix bug in some conditions delta2 calc error
+*
 * Copyright 2016 mardyu<michealyxd@hotmail.com>
 * Licensed under the MIT license. See LICENSE file in the project root for full license information.
 */
@@ -20,6 +23,7 @@ extern "C" {
 #include <assert.h>
 #include <string.h>
 #include <stdio.h>
+#include <stdbool.h>
 
 #define DELTA1_LENGTH 256
 #define DELTA2_STANDBY_LENGTH 256
@@ -53,10 +57,12 @@ static void _init_delta2(int *delta2, char *sub, int len_sub)
 	int k;
 	int len;
 	int len_match;
+	bool match_done = false;
 
 	for (i = 1; i < len_sub; i++) {
 		len_match = len_sub - i;
 		j = 0;
+		match_done = false;
 		while (++j < len_sub) {
 
 			len = len_sub - j;
@@ -64,12 +70,13 @@ static void _init_delta2(int *delta2, char *sub, int len_sub)
 				if (k >= len_match) {
 					if (sub[len_sub - k - 1] == sub[len - k - 1])
 						break;
+					match_done = true;
 				} else {
 					if (sub[len_sub - k - 1] != sub[len - k - 1])
 						break;
 				}
 			}
-			if (k == len)
+			if (k == len || match_done)
 				break;
 		}
 

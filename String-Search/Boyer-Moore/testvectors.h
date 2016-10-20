@@ -5,7 +5,7 @@
 extern "C" {
 #endif
 
-const int cTestVectorCount = 8;
+const int cTestVectorCount = 9;
 
 const char *cTestVectorOrigin[] = {
 	"Hello world",
@@ -16,6 +16,7 @@ const char *cTestVectorOrigin[] = {
 	"Hello world",
 	"svertices vertices",
 	"FFS :svertices :vertices",
+	"cabadccabcdab",
 };
 
 const char *cTestVectorSub[] = {
@@ -27,10 +28,11 @@ const char *cTestVectorSub[] = {
 	"not",
 	"vertices",
 	":vertices",
+	"ccabcdab",
 };
 
 const int cTestVectorResult[] = {
-	-1, -1, 0, 6, 4, -1, 1, 15
+	-1, -1, 0, 6, 4, -1, 1, 15, 5
 };
 
 #ifdef __cplusplus
