@@ -17,14 +17,17 @@ extern "C" {
 #endif
 
 #include <stdint.h>
+#include <stdlib.h>
 
-#define USE_SELF_ITEM_TYPE
+//#define USE_SELF_ITEM_TYPE
 
 #ifndef USE_SELF_ITEM_TYPE
 typedef void sort_item_t;
 #else
 typedef int64_t sort_item_t;
 #endif
+
+#define MALLOC(sz) malloc(sz)
 
 typedef int (*sort_comparer) (sort_item_t *l, sort_item_t *r);
 
@@ -35,6 +38,7 @@ int sort_comparer_double(sort_item_t *l, sort_item_t *r);
 
 int bubbly_sort(sort_item_t **items, size_t size, size_t unit_size, sort_comparer compare);
 int selection_sort(sort_item_t **items, size_t size, size_t unit_size, sort_comparer compare);
+int merge_sort(sort_item_t **items, size_t size, size_t unit_size, sort_comparer compare);
 
 #ifdef __cplusplus
 }

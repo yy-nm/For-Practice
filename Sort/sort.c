@@ -6,6 +6,7 @@
 * History:
 * - 2016-10-11 finish bubbly sort
 * - 2016-10-17 finish selection sort
+* - 2016-10-25 finish merge sort
 *
 * Authors:
 * mardyu<michealyxd@hotmail.com>
@@ -83,6 +84,11 @@ typedef int (*sort_method)(sort_item_t **items, size_t size, size_t unit_size, s
 
 #define UNIT_BUFFER_SZ 64
 
+#define SWAP(l, r, tmp, sz) \
+	(_copy_value(tmp, l, sz), _copy_value(l, r, sz), _copy_value(r, tmp, sz))
+
+
+
 #ifdef USE_SELF_ITEM_TYPE
 #define _copy_value(l, r, sz) (*(l) = *(r))
 #else
@@ -127,7 +133,7 @@ static int _sort (sort_item_t **items, size_t size, size_t unit_size, sort_compa
 		tmp = (sort_item_t *)buf;
 	else
 	{
-		buf_alloc = (char *)malloc(unit_size);
+		buf_alloc = (char *)MALLOC(unit_size);
 		if (buf_alloc == NULL) /* mem is out of running */
 			return ;
 		tmp = (sort_item_t *)buf_alloc;
@@ -151,6 +157,7 @@ static int _sort (sort_item_t **items, size_t size, size_t unit_size, sort_compa
 
 /* implements ************************************************/
 
+/* Bubbly **************************************/
 static int _bubbly_sort(sort_item_t **items, size_t size, size_t unit_size, sort_comparer compare, sort_item_t *tmp)
 {
 	sort_item_t *l, *r;
@@ -173,6 +180,7 @@ static int _bubbly_sort(sort_item_t **items, size_t size, size_t unit_size, sort
 	return 0;
 }
 
+/* Selection **************************************/
 static int _selection_sort(sort_item_t **items, size_t size, size_t unit_size, sort_comparer compare, sort_item_t *tmp)
 {
 	sort_item_t *min, *nor;
@@ -203,6 +211,80 @@ static int _selection_sort(sort_item_t **items, size_t size, size_t unit_size, s
 	return 0;
 }
 
+/* Merge **************************************/
+static void _merge_split_sort(sort_item_t **start, size_t totalsize, size_t stepsize, sort_item_t **newone
+							  , size_t unit_size, sort_comparer compare, sort_item_t *tmp)
+{
+	int leftpartsize = stepsize;
+	int rightpartsize = totalsize - stepsize;
+	int i = 0;
+	int j = 0;
+	sort_item_t *l, *r;
+	int ret;
+	int ni = 0;
+	while (i < leftpartsize && j < rightpartsize) {
+		l = STEPN(start, unit_size, i, sort_item_t);
+		r = STEPN(start, unit_size, j + stepsize, sort_item_t);
+		ret = (*compare)(l, r);
+		if (ret < 0) {
+			_copy_value(STEPN(newone, unit_size, ni, sort_item_t), r, unit_size);
+			j++;
+		} else {
+			_copy_value(STEPN(newone, unit_size, ni, sort_item_t), l, unit_size);
+			i++;
+		}
+		ni++;
+	}
+	if (i < leftpartsize) {
+		for (i; i < leftpartsize; i++, ni++)
+			_copy_value(STEPN(newone, unit_size, ni, sort_item_t),
+						STEPN(start, unit_size, i, sort_item_t), unit_size);
+	} else if(j < rightpartsize) {
+		for (j; j < rightpartsize; j++, ni++)
+			_copy_value(STEPN(newone, unit_size, ni, sort_item_t),
+						STEPN(start, unit_size, j + stepsize, sort_item_t), unit_size);
+	}
+}
+
+static int _merge_sort(sort_item_t **items, size_t size, size_t unit_size, sort_comparer compare, sort_item_t *tmp)
+{
+	int i;
+	int step;
+	sort_item_t **tmpitemsl = NULL;
+	sort_item_t **tmpitemsr = NULL;
+	sort_item_t **newone = NULL;
+	newone = (sort_item_t **)MALLOC(unit_size * size);
+	if (!newone) {
+		perror("malloc fail");
+		return -1;
+	}
+
+	for (step = 1; step < size; step += step) {
+		if (!tmpitemsl || tmpitemsl == items) {
+			tmpitemsl = newone;
+			tmpitemsr = items;
+		} else {
+			tmpitemsl = items;
+			tmpitemsr = newone;
+		}
+
+		for (i = 0; i < size; i += 2 * step) {
+			_merge_split_sort(STEPN(tmpitemsr, unit_size, i, sort_item_t),
+							  i + 2 * step < size ? 2 * step : size - i,
+							  i + step < size ? step : size - i
+							  , STEPN(tmpitemsl, unit_size, i, sort_item_t)
+							  , unit_size, compare, tmp);
+		}
+	}
+
+	if (tmpitemsl != items) {
+		for (i = 0; i < size; i++) {
+			_copy_value(STEPN(items, unit_size, i, sort_item_t), STEPN(newone, unit_size, i, sort_item_t), unit_size);
+		}
+	}
+
+	return 0;
+}
 
 /* wrapper ************************************************/
 
@@ -213,6 +295,10 @@ int bubbly_sort(sort_item_t **items, size_t size, size_t unit_size, sort_compare
 
 int selection_sort(sort_item_t **items, size_t size, size_t unit_size, sort_comparer compare)
 {
-	return _selection_sort(items, size, unit_size, compare, _selection_sort);
+	return _sort(items, size, unit_size, compare, _selection_sort);
 }
 
+int merge_sort(sort_item_t **items, size_t size, size_t unit_size, sort_comparer compare)
+{
+	return _sort(items, size, unit_size, compare, _merge_sort);
+}

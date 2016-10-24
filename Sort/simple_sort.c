@@ -6,6 +6,7 @@
 * History:
 * - 2016-10-11 finish bubbly sort
 * - 2016-10-17 finish selection sort
+* - 2016-10-25 finish merge sort
 *
 * Authors:
 * mardyu<michealyxd@hotmail.com>
@@ -62,5 +63,72 @@ int selection_simple_sort(int64_t *items, size_t size)
 		}
 	}
 
+	return 0;
+}
+
+static void _merge_split_simple_sort(int64_t *start, size_t totalsize, size_t stepsize, int64_t *newone)
+{
+	int leftpartsize = stepsize;
+	int rightpartsize = totalsize - stepsize;
+	int i = 0;
+	int j = 0;
+	int64_t l, r;
+	int ni = 0;
+	while (i < leftpartsize && j < rightpartsize) {
+		l = start[i];
+		r = start[j + stepsize];
+		if (l > r) {
+			newone[ni] = r;
+			j++;
+		} else {
+			newone[ni] = l;
+			i++;
+		}
+		ni++;
+	}
+	if (i < leftpartsize) {
+		for (i; i < leftpartsize; i++, ni++)
+			newone[ni] = start[i];
+	} else if(j < rightpartsize) {
+		for (j; j < rightpartsize; j++, ni++)
+			newone[ni] = start[j + stepsize];
+	}
+}
+
+int merge_simple_sort(int64_t *items, size_t size)
+{
+	int i;
+	int step;
+	int64_t *tmpitemsl = NULL;
+	int64_t *tmpitemsr = NULL;
+	int64_t *newone = NULL;
+	newone = (int64_t *)MALLOC(sizeof(int64_t) * size);
+	if (!newone) {
+		perror("malloc fail");
+		return -1;
+	}
+
+	for (step = 1; step < size; step += step) {
+		if (!tmpitemsl || tmpitemsl == items) {
+			tmpitemsl = newone;
+			tmpitemsr = items;
+		} else {
+			tmpitemsl = items;
+			tmpitemsr = newone;
+		}
+
+		for (i = 0; i < size; i += 2 * step) {
+			_merge_split_simple_sort(tmpitemsr + i,
+							  i + 2 * step < size ? 2 * step : size - i,
+							  i + step < size ? step : size - i
+							  , tmpitemsl + i);
+		}
+	}
+
+	if (tmpitemsl != items) {
+		for (i = 0; i < size; i++) {
+			items[i] = newone[i];
+		}
+	}
 	return 0;
 }

@@ -18,9 +18,13 @@ extern "C" {
 #endif
 
 #include <stdint.h>
+#include <stdlib.h>
+
+#define MALLOC(sz) malloc(sz)
 
 int bubbly_simple_sort(int64_t *items, size_t size);
 int selection_simple_sort(int64_t *items, size_t size);
+int merge_simple_sort(int64_t *items, size_t size);
 
 #ifdef __cplusplus
 }
