@@ -7,6 +7,7 @@
 * - 2016-10-11 finish bubbly sort
 * - 2016-10-17 finish selection sort
 * - 2016-10-25 finish merge sort
+* - 2016-10-26 finish quick sort
 *
 * Authors:
 * mardyu<michealyxd@hotmail.com>
@@ -131,4 +132,49 @@ int merge_simple_sort(int64_t *items, size_t size)
 		}
 	}
 	return 0;
+}
+
+static void _quick_split_simple_sort(int64_t start[], size_t size)
+{
+	if (size <= 1)
+		return;
+//	int64_t base = start[0];
+	int64_t tmp;
+	int i = 0;
+	int j = size;
+	while (i<= j) {
+
+		do {
+			++i;
+		} while (start[0] > start[i] && i < size);
+
+		do {
+			--j;
+		} while (start[j] > start[0] && 0 <= j);
+
+		if (i < j) {
+			tmp = start[i];
+			start[i] = start[j];
+			start[j] = tmp;
+		} else if (i >= j) {
+			break;
+		}
+	}
+
+	if (j > 0) {
+		tmp = start[0];
+		start[0] = start[j];
+		start[j] = tmp;
+	}
+	if (j > 0) {
+		_quick_split_simple_sort(&start[0], j);
+	}
+	if (j < size) {
+		_quick_split_simple_sort(&start[j + 1], size - j - 1);
+	}
+}
+
+int quick_simple_sort(int64_t items[], size_t size)
+{
+	_quick_split_simple_sort(items, size);
 }

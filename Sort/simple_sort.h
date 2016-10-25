@@ -25,6 +25,7 @@ extern "C" {
 int bubbly_simple_sort(int64_t *items, size_t size);
 int selection_simple_sort(int64_t *items, size_t size);
 int merge_simple_sort(int64_t *items, size_t size);
+int quick_simple_sort(int64_t *items, size_t size);
 
 #ifdef __cplusplus
 }

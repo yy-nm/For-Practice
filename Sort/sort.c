@@ -7,6 +7,7 @@
 * - 2016-10-11 finish bubbly sort
 * - 2016-10-17 finish selection sort
 * - 2016-10-25 finish merge sort
+* - 2016-10-26 finish quick sort
 *
 * Authors:
 * mardyu<michealyxd@hotmail.com>
@@ -19,6 +20,7 @@
 
 #include <stdio.h>
 #include <stdint.h>
+#include <stdbool.h>
 
 inline int sort_comparer_int32(sort_item_t *l, sort_item_t *r)
 {
@@ -269,10 +271,10 @@ static int _merge_sort(sort_item_t **items, size_t size, size_t unit_size, sort_
 		}
 
 		for (i = 0; i < size; i += 2 * step) {
-			_merge_split_sort(STEPN(tmpitemsr, unit_size, i, sort_item_t),
+			_merge_split_sort(STEPN(tmpitemsr, unit_size, i, sort_item_t*),
 							  i + 2 * step < size ? 2 * step : size - i,
 							  i + step < size ? step : size - i
-							  , STEPN(tmpitemsl, unit_size, i, sort_item_t)
+							  , STEPN(tmpitemsl, unit_size, i, sort_item_t*)
 							  , unit_size, compare, tmp);
 		}
 	}
@@ -285,6 +287,61 @@ static int _merge_sort(sort_item_t **items, size_t size, size_t unit_size, sort_
 
 	return 0;
 }
+
+/* Quick **************************************/
+
+static void _quick_split_sort(sort_item_t **start, size_t size, size_t unit_size, sort_comparer compare, sort_item_t *tmp)
+{
+	if (size <= 1)
+		return;
+	sort_item_t *base = STEPN(start, unit_size, 0, sort_item_t);
+	int i = 0;
+	int j = size;
+	sort_item_t *l = NULL;
+	sort_item_t *r = NULL;
+	int retl;
+	int retr;
+	while (i<= j) {
+
+		do {
+			++i;
+			l = STEPN(start, unit_size, i, sort_item_t);
+			retl = (*compare)(l, base);
+		} while (retl > 0 && i < size);
+
+		do {
+			--j;
+			r = STEPN(start, unit_size, j, sort_item_t);
+			retr = (*compare)(base, r);
+		} while (retr > 0 && 0 <= j);
+
+		if (i < j) {
+			if (retr != 0 || retl != 0)
+				SWAP(l, r, tmp, unit_size);
+			l = NULL;
+			r = NULL;
+		} else if (i >= j) {
+			break;
+		}
+	}
+
+	if (j > 0) {
+		SWAP(base, r, tmp, unit_size);
+	}
+	if (j > 0) {
+		_quick_split_sort(start, j, unit_size, compare, tmp);
+	}
+	if (j < size) {
+		_quick_split_sort(STEPN(start, unit_size, j + 1, sort_item_t*), size - j - 1, unit_size, compare, tmp);
+	}
+}
+
+static int _quick_sort(sort_item_t **items, size_t size, size_t unit_size, sort_comparer compare, sort_item_t *tmp)
+{
+	_quick_split_sort(items, size, unit_size, compare, tmp);
+	return 0;
+}
+
 
 /* wrapper ************************************************/
 
@@ -301,4 +358,9 @@ int selection_sort(sort_item_t **items, size_t size, size_t unit_size, sort_comp
 int merge_sort(sort_item_t **items, size_t size, size_t unit_size, sort_comparer compare)
 {
 	return _sort(items, size, unit_size, compare, _merge_sort);
+}
+
+int quick_sort(sort_item_t **items, size_t size, size_t unit_size, sort_comparer compare)
+{
+	return _sort(items, size, unit_size, compare, _quick_sort);
 }

@@ -39,6 +39,7 @@ int sort_comparer_double(sort_item_t *l, sort_item_t *r);
 int bubbly_sort(sort_item_t **items, size_t size, size_t unit_size, sort_comparer compare);
 int selection_sort(sort_item_t **items, size_t size, size_t unit_size, sort_comparer compare);
 int merge_sort(sort_item_t **items, size_t size, size_t unit_size, sort_comparer compare);
+int quick_sort(sort_item_t **items, size_t size, size_t unit_size, sort_comparer compare);
 
 #ifdef __cplusplus
 }
