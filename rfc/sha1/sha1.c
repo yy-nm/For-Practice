@@ -192,7 +192,7 @@ int sha1_update(struct sha1_context *context, const char *in, const int len_in)
 		U32 l = len_in;
 		context->len += ((U64)l) << 3;
 
-		if (context->ptr != 0 && context->ptr + l > LEN_BLOCK) {
+		if (context->ptr != 0 && context->ptr + l >= LEN_BLOCK) {
 			int cpycount = LEN_BLOCK - context->ptr;
 			memcpy(context->block + context->ptr, in, cpycount);
 			_sha1_update_1(context, context->block, LEN_BLOCK);

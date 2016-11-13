@@ -189,7 +189,7 @@ int md5_update(struct md5_context *context, const char *in, const int len_in)
 	if (in) {
 		U32 l = len_in;
 		context->len += ((U64)l) << 3;
-		if (context->offset != 0 && context->offset + l > LEN_MODER) {
+		if (context->offset != 0 && context->offset + l >= LEN_MODER) {
 			int cpycount = LEN_MODER - context->offset;
 			memcpy(context->block + context->offset, in, cpycount);
 			_md5_update(context, context->block, LEN_MODER);
@@ -231,7 +231,7 @@ int md5_update(struct md5_context *context, const char *in, const int len_in)
 		*last++ = (l >> 40) & 0xff;
 		*last++ = (l >> 48) & 0xff;
 		*last++ = (l >> 56) & 0xff;
-		
+
 		_md5_update(context, context->block, LEN_MODER);
 	}
 
@@ -272,4 +272,3 @@ int md5(const char *in, const int len_in, char *out, const int len_out)
 
 	return MD5_OK;
 }
-
