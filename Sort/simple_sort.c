@@ -131,6 +131,7 @@ int merge_simple_sort(int64_t *items, size_t size)
 			items[i] = newone[i];
 		}
 	}
+	free(newone);
 	return 0;
 }
 
