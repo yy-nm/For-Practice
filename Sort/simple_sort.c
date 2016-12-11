@@ -8,6 +8,7 @@
 * - 2016-10-17 finish selection sort
 * - 2016-10-25 finish merge sort
 * - 2016-10-26 finish quick sort
+* - 2016-12-11 finish bucket sort
 *
 * Authors:
 * mardyu<michealyxd@hotmail.com>
@@ -131,7 +132,7 @@ int merge_simple_sort(int64_t *items, size_t size)
 			items[i] = newone[i];
 		}
 	}
-	free(newone);
+	FREE(newone);
 	return 0;
 }
 
@@ -178,4 +179,49 @@ static void _quick_split_simple_sort(int64_t start[], size_t size)
 int quick_simple_sort(int64_t items[], size_t size)
 {
 	_quick_split_simple_sort(items, size);
+}
+
+int bucket_simple_sort(int64_t *items, size_t size)
+{
+	if (NULL == items)
+		return -1;
+
+	int64_t max = 0;
+	int64_t min = 0;
+	int64_t offset = 0;
+	int64_t *bucket = NULL;
+	int64_t bucketlen = 0;
+	int i;
+	int index;
+	if (size > 0) {
+		max = min = items[0];
+	}
+	for (i = 0; i < size; i++) {
+		if (items[i] > max)
+			max = items[i];
+		if (items[i] < min)
+			min = items[i];
+	}
+	offset = min;
+	bucketlen = max - offset + 1;
+	bucket = MALLOC(bucketlen * sizeof(int64_t));
+	if (!bucket)
+		return errno;
+	memset(bucket, 0, bucketlen * sizeof(int64_t));
+	for (i = 0; i < size; i++) {
+		bucket[items[i] - offset]++;
+	}
+
+	index = 0;
+	for (i = 0; i < bucketlen; i++) {
+		while (bucket[i] > 0) {
+			items[index++] = i + offset;
+			bucket[i] --;
+		}
+	}
+
+	if (bucket)
+		FREE(bucket);
+
+	return 0;
 }
