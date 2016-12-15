@@ -48,8 +48,6 @@ int main(int argc, char **argv) {
 	char result[16];
 	char show[33];
 	long off;
-	int len = 4 * 1024;
-	/*struct sha1_context c;*/
 	struct md5_context c;
 	for (i = 1; i < argc; i++) {
 		fd = open(argv[i], O_RDONLY);
@@ -60,7 +58,6 @@ int main(int argc, char **argv) {
 		fstat(fd, &st);
 		sz = st.st_size;
 		off = 0;
-		/*sha1_init(&c);*/
 		md5_init(&c);
 		buf = NULL;
 		buf = mmap(buf, sz, PROT_READ, MAP_SHARED, fd, off);
@@ -68,15 +65,14 @@ int main(int argc, char **argv) {
 			perror("read file error");
 			goto err;
 		}
-		/*sha1_update(&c, buf, sz);*/
-		/*sha1_final(&c, result, sizeof(result));*/
 		md5_update(&c, buf, sz);
 		md5_final(&c, result, sizeof(result));
 		tohex(result, sizeof(result), show, sizeof(show));
 		show[32] = '\0';
 		printf("%s\t%s\n", show, argv[i]);
 err:
-		munmap(buf, len);
+
+		munmap(buf, sz);
 		close(fd);
 	}
 	

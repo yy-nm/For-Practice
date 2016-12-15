@@ -200,7 +200,7 @@ int md5_update(struct md5_context *context, const char *in, const int len_in)
 
 		if (context->offset == 0) {
 			if (l > LEN_MODER) {
-				_md5_update(context, in, l &(~LEN_MASK));
+				_md5_update(context, (U8 *)in, l &(~LEN_MASK));
 				in += l &(~LEN_MASK);
 				l -= l &(~LEN_MASK);
 			}
