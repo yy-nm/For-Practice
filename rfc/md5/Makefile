@@ -1,23 +1,42 @@
 
 
-all: mmap readblock
-.PHONY: test clean libdynamic libstatic
+CC ?= gcc -std=gnu99
+SHARED := -fPIC --shared
+LIB ?= libs
+OBJ ?= obj
+CFLAGS = -O2 -Wall
+AR = ar rcs
+RM = rm -rf
+
+all: mmap
+.PHONY: test clean libdynamic libstatic lib readblock array
+
+$(LIB):
+	mkdir $(LIB)
+
+$(OBJ):
+	mkdir $(OBJ)
 
 mmap:
-	gcc -Wall -o md5-mmap -O3 main.linux.mmap.c md5.c
+	$(CC) $(CFLAGS) -o md5 main.linux.mmap.c md5.c
 
 readblock:
-	gcc -Wall -o md5-readblock -O3 main.linux.read.c md5.c
+	$(CC) $(CFLAGS) -o md5-read main.linux.read.c md5.c
 
-libdynamic:
-	gcc -shared -o libmd5.so -fPIC md5.c
+array:
+	$(CC) $(CFLAGS) -o md5-array main.linux.array.c md5.c
 
-libstatic:
-	gcc -c -o md5.o md5.c
-	ar rcs libmd5.a md5.o
+lib: libdynamic libstatic
+
+libdynamic: | $(LIB)
+	$(CC) $(SHARED) $(CFLAGS) -o $(LIB)/libmd5.so md5.c
+
+libstatic: | $(LIB) $(OBJ)
+	$(CC) $(CFLAGS) -c -o $(OBJ)/md5.o md5.c
+	$(AR) $(LIB)/libmd5.a $(OBJ)/md5.o
 
 test:
-	gcc -Wall -o md5-test -O3 main.c md5.c tohex.c
+	$(CC) $(CFLAGS) -o md5-test main.c md5.c tohex.c
 
 clean:
-	rm -rf md5-test md5-mmap md5-readblock libmd5.so libmd5.a md5.o
+	$(RM) md5-test md5 md5-read md5-array $(LIB)/* $(OBJ)/*

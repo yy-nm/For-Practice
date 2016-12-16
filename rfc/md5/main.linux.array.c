@@ -7,7 +7,7 @@
 #include <errno.h>
 #include <unistd.h>
 #include <sys/types.h>
-#include <sys/mman.h>
+//#include <sys/mman.h>
 
 #include "md5.h"
 
@@ -49,11 +49,7 @@ int main(int argc, char **argv) {
 	char show[33];
 	int len = LEN_BUF;
 	struct md5_context c;
-	char *buf = (char *)mmap(NULL, LEN_BUF, PROT_READ | PROT_WRITE, MAP_ANON|MAP_SHARED, -1, 0);
-	if (buf == MAP_FAILED) {
-		perror("alloc mem fail");
-		return -1;
-	}
+	char buf[LEN_BUF];
 	for (i = 1; i < argc; i++) {
 		fd = open(argv[i], O_RDONLY);
 		if (fd < 0 ) {
@@ -78,7 +74,6 @@ int main(int argc, char **argv) {
 err:
 		close(fd);
 	}
-	munmap(buf, LEN_BUF);
-
+	
 	return 0;
 }
