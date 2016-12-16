@@ -97,7 +97,7 @@ static inline void LENADDBLOCK(U64 lens[2], U64 add)
 }
 
 
-void _sha512_update(struct sha512_context *context, const char *in, const U32 len_in)
+void _sha512_update(struct sha512_context *context, const U8 *in, const U32 len_in)
 {
 
 	U32 in_index;
@@ -229,7 +229,7 @@ int sha512_update(struct sha512_context *context, const char *in, const int len_
 
 		if (context->ptr == 0) {
 			if (l >= LEN_BLOCK) {
-				_sha512_update(context, in, l &(~LEN_BLOCK_MASK));
+				_sha512_update(context, (U8 *)in, l &(~LEN_BLOCK_MASK));
 				in += l & (~LEN_BLOCK_MASK);
 				l = l & LEN_BLOCK_MASK;
 			}

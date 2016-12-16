@@ -69,10 +69,10 @@ static const U32 _K[80] =
 
 
 
-void _sha224_update(struct sha224_context *context, const char *in, const U32 len_in)
+void _sha224_update(struct sha224_context *context, const U8 *in, const size_t len_in)
 {
 
-	U32 in_index;
+	size_t in_index;
 
 	U32 W[64];
 	U8 *M;
@@ -178,13 +178,13 @@ int sha224_init(struct sha224_context *context)
 	return SHA224_OK;
 }
 
-int sha224_update(struct sha224_context *context, const char *in, const int len_in)
+int sha224_update(struct sha224_context *context, const char *in, const size_t len_in)
 {
 	if (!context)
 		return SHA224_CONTEXT_NULL;
 	if (in)
 	{
-		U32 l = len_in;
+		size_t l = len_in;
 		context->len += ((U64)l << 3);
 		if (context->ptr != 0 && context->ptr + l >= LEN_BLOCK) {
 			int cpycount = LEN_BLOCK - context->ptr;
@@ -197,7 +197,7 @@ int sha224_update(struct sha224_context *context, const char *in, const int len_
 
 		if (context->ptr == 0) {
 			if (l >= LEN_BLOCK) {
-				_sha224_update(context, in, l &(~LEN_BLOCK_MASK));
+				_sha224_update(context, (U8 *)in, l &(~LEN_BLOCK_MASK));
 				in += l & (~LEN_BLOCK_MASK);
 				l = l & LEN_BLOCK_MASK;
 			}
@@ -261,7 +261,7 @@ int sha224_final(struct sha224_context *context, char *out, const int len_out)
 }
 
 
-int sha224(const char *input, const int len_input, char *output, const int len_output)
+int sha224(const char *input, const size_t len_input, char *output, const int len_output)
 {
 	if (len_output < LEN_RESULT)
 		return SHA224_LEN_ERROR;

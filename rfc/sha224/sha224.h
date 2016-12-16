@@ -18,6 +18,7 @@ extern "C" {
 
 
 #include <stdint.h>
+#include <stddef.h>
 
 typedef uint64_t U64;
 typedef int32_t I32;
@@ -49,11 +50,11 @@ struct sha224_context {
 //struct sha224_context;
 // handle with file which has huge size
 int sha224_init(struct sha224_context *context);
-int sha224_update(struct sha224_context *context, const char *in, const int len_in);
+int sha224_update(struct sha224_context *context, const char *in, const size_t len_in);
 int sha224_final(struct sha224_context *context, char *out, const int len_out);
 
 // handle with some string which can read all in once
-int sha224(const char *input, const int len_input, char *output, const int len_output);
+int sha224(const char *input, const size_t len_input, char *output, const int len_output);
 
 #ifdef __cplusplus
 }
