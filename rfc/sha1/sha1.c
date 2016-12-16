@@ -85,7 +85,7 @@ int sha1_init(struct sha1_context *context)
 	return SHA1_OK;
 }
 
-void _sha1_update_1(struct sha1_context *context, const char *in, const U32 len_in)
+void _sha1_update_1(struct sha1_context *context, const U8 *in, const U32 len_in)
 {
 	U32 W[80];
 	int i;
@@ -202,7 +202,7 @@ int sha1_update(struct sha1_context *context, const char *in, const int len_in)
 		}
 		if (context->ptr == 0) {
 			if (l >= LEN_BLOCK) {
-				_sha1_update_1(context, in, l & (~LEN_BLOCK_MASK));
+				_sha1_update_1(context, (U8 *)in, l & (~LEN_BLOCK_MASK));
 				in += l & (~LEN_BLOCK_MASK);
 				l -= l & (~LEN_BLOCK_MASK);
 			}

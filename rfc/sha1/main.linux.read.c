@@ -38,18 +38,21 @@ int tohex(const char *input, const int len_input, char *output, const int len_ou
 	return 0;
 }
 
-#define LEN_BUF 4 * 1024 * 1024
+#define PAGE_SZ 4 * 1024
+#define LEN_BUF 64 * PAGE_SZ
 int main(int argc, char **argv) {
 
 	int i = 0;
 	int fd = 0;
 	long sz;
-	struct stat st;
-	char buf[LEN_BUF];
 	char result[20];
 	char show[41];
-	long off;
 	int len = LEN_BUF;
+	char *buf = (char *)mmap(NULL, LEN_BUF, PROT_READ | PROT_WRITE, MAP_ANON|MAP_SHARED, -1, 0);
+		if (buf == MAP_FAILED) {
+			perror("alloc mem fail");
+			return -1;
+		}
 	struct sha1_context c;
 	for (i = 1; i < argc; i++) {
 		fd = open(argv[i], O_RDONLY);
@@ -57,9 +60,6 @@ int main(int argc, char **argv) {
 			perror("open file error");
 			continue;
 		}
-		fstat(fd, &st);
-		sz = st.st_size;
-		off = 0;
 		sha1_init(&c);
 		sz = len;
 		while (sz == len) {
@@ -78,6 +78,7 @@ int main(int argc, char **argv) {
 err:
 		close(fd);
 	}
+	munmap(buf, LEN_BUF);
 	
 	return 0;
 }

@@ -7,7 +7,6 @@
 #include <errno.h>
 #include <unistd.h>
 #include <sys/types.h>
-#include <sys/mman.h>
 
 #include "sha1.h"
 
@@ -38,15 +37,17 @@ int tohex(const char *input, const int len_input, char *output, const int len_ou
 	return 0;
 }
 
+#define PAGE_SZ 4 * 1024
+#define LEN_BUF 64 * PAGE_SZ
 int main(int argc, char **argv) {
+
 	int i = 0;
 	int fd = 0;
 	long sz;
-	struct stat st;
-	char *buf;
+	char buf[LEN_BUF];
 	char result[20];
 	char show[41];
-	long off;
+	int len = LEN_BUF;
 	struct sha1_context c;
 	for (i = 1; i < argc; i++) {
 		fd = open(argv[i], O_RDONLY);
@@ -54,23 +55,22 @@ int main(int argc, char **argv) {
 			perror("open file error");
 			continue;
 		}
-		fstat(fd, &st);
-		sz = st.st_size;
-		off = 0;
 		sha1_init(&c);
-		buf = NULL;
-		buf = mmap(buf, sz, PROT_READ, MAP_SHARED, fd, off);
-		if (buf == MAP_FAILED) {
-			perror("read file error");
-			goto err;
+		sz = len;
+		while (sz == len) {
+			sz = read(fd, buf, len);
+			if (sz < 0) {
+				perror("read file error");
+				goto err;
+			}
+			sha1_update(&c, buf, sz);
 		}
-		sha1_update(&c, buf, sz);
+
 		sha1_final(&c, result, sizeof(result));
 		tohex(result, sizeof(result), show, sizeof(show));
 		show[40] = '\0';
 		printf("%s\t%s\n", show, argv[i]);
 err:
-		munmap(buf, sz);
 		close(fd);
 	}
 	
