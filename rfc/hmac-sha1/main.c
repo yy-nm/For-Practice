@@ -28,7 +28,7 @@ void check(char *k, int klen, char *text, int textlen, char *digst)
 int main(void)
 {
 	int i;
-	int count = 0;
+//	int count = 0;
 
 	char test[20];
 	char test_text[] = "Hi There";

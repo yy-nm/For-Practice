@@ -69,7 +69,7 @@ static const U32 _K[80] =
 
 
 
-void _sha256_update(struct sha256_context *context, const char *in, const U32 len_in)
+void _sha256_update(struct sha256_context *context, const U8 *in, const U32 len_in)
 {
 
 	U32 in_index;
@@ -197,7 +197,7 @@ int sha256_update(struct sha256_context *context, const char *in, const int len_
 
 		if (context->ptr == 0) {
 			if (l >= LEN_BLOCK) {
-				_sha256_update(context, in, l &(~LEN_BLOCK_MASK));
+				_sha256_update(context, (U8 *)in, l &(~LEN_BLOCK_MASK));
 				in += l & (~LEN_BLOCK_MASK);
 				l = l & LEN_BLOCK_MASK;
 			}

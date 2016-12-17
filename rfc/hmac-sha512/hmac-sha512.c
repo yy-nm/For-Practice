@@ -30,6 +30,8 @@
 #define ipad 0x36
 #define opad 0x5c
 
+#define UNUSED(x) ((void) (x))
+
 static void _xor(uint8_t bstring[B], uint8_t pad)
 {
 	int i;
@@ -46,8 +48,8 @@ int hmac_sha512(const char *k, size_t klen, const char *text, size_t textlen, ch
 	if (outlen < L)
 		return -1;
 
-	uint8_t block[B];
-	uint8_t mid[L];
+	char block[B];
+	char mid[L];
 
 	memset(block, 0, B);
 
@@ -60,9 +62,10 @@ int hmac_sha512(const char *k, size_t klen, const char *text, size_t textlen, ch
 	}
 
 	// 2
-	_xor(block, ipad);
+	_xor((uint8_t *)block, ipad);
 
 	int ret;
+	UNUSED(ret);
 	// 3 - 4
 	H_CONTEXT c1;
 	ret = H_INIT(&c1);
@@ -71,7 +74,7 @@ int hmac_sha512(const char *k, size_t klen, const char *text, size_t textlen, ch
 	ret = H_FINAL(&c1, mid, L);
 
 	// 5
-	_xor(block, opad ^ ipad);
+	_xor((uint8_t *)block, opad ^ ipad);
 
 	// 6 - 7
 	H_CONTEXT c2;

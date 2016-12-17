@@ -28,6 +28,8 @@
 #define ipad 0x36
 #define opad 0x5c
 
+#define UNUSED(x) ((void) (x))
+
 static void _xor(uint8_t bstring[B], uint8_t pad)
 {
 	int i;
@@ -47,11 +49,11 @@ int hmac_md5(const char *k, size_t klen, const char *text, size_t textlen, char 
 	uint8_t block[B];
 	uint8_t mid[L];
 
-	memset(block, 0, B);
+	memset((char *)block, 0, B);
 
 	// 1
 	if (klen > B) {
-		H(k, klen, block, B);
+		H(k, klen, (char *)block, B);
 	}
 	else {
 		memcpy(block, k, klen);
@@ -61,12 +63,13 @@ int hmac_md5(const char *k, size_t klen, const char *text, size_t textlen, char 
 	_xor(block, ipad);
 
 	int ret;
+	UNUSED(ret);
 	// 3 - 4
 	H_CONTEXT c1;
 	ret = H_INIT(&c1);
-	ret = H_UPDATE(&c1, block, B);
+	ret = H_UPDATE(&c1, (char *)block, B);
 	ret = H_UPDATE(&c1, text, textlen);
-	ret = H_FINAL(&c1, mid, L);
+	ret = H_FINAL(&c1, (char *)mid, L);
 
 	// 5
 	_xor(block, opad ^ ipad);
@@ -74,8 +77,8 @@ int hmac_md5(const char *k, size_t klen, const char *text, size_t textlen, char 
 	// 6 - 7
 	H_CONTEXT c2;
 	ret = H_INIT(&c2);
-	ret = H_UPDATE(&c2, block, B);
-	ret = H_UPDATE(&c2, mid, L);
+	ret = H_UPDATE(&c2, (char *)block, B);
+	ret = H_UPDATE(&c2, (char *)mid, L);
 	ret = H_FINAL(&c2, out, outlen);
 
 	return 0;
