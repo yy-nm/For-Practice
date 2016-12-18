@@ -1,7 +1,7 @@
 
 /*
 * boyer-moore-string-search.c: implements string search Algorithm accord to a paper named A Fast String Searching
-* Algorithm which write by Robert S. Boyer and J Strother Moore
+*  Algorithm(http://www.cs.utexas.edu/users/moore/publications/fstrpos.pdf) which write by Robert S. Boyer and J Strother Moore
 *
 * Authors:
 * mardyu<michealyxd@hotmail.com>
@@ -12,11 +12,6 @@
 * Copyright 2016 mardyu<michealyxd@hotmail.com>
 * Licensed under the MIT license. See LICENSE file in the project root for full license information.
 */
-
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 
 #include "boyer-moore-string-search.h"
 
@@ -40,7 +35,7 @@ void boyer_moore_set_malloc_method(Self_Malloc method)
 		MALLOC_METHOD = method;
 }
 
-static void _init_delta1(int delta1[DELTA1_LENGTH], char *sub, int len_sub)
+static void _init_delta1(int delta1[DELTA1_LENGTH], const char *sub, int len_sub)
 {
 	int i;
 	for (i = 0; i < DELTA1_LENGTH; i++)
@@ -50,7 +45,7 @@ static void _init_delta1(int delta1[DELTA1_LENGTH], char *sub, int len_sub)
 	}
 }
 
-static void _init_delta2(int *delta2, char *sub, int len_sub)
+static void _init_delta2(int *delta2, const char *sub, int len_sub)
 {
 	int i;
 	int j;
@@ -85,14 +80,16 @@ static void _init_delta2(int *delta2, char *sub, int len_sub)
 	delta2[len_sub - 1] = 1;
 }
 
+/*
 static void _print_delta(int *delta, int len_delta)
 {
 	int i;
 	for (i = 0; i < len_delta; i++)
 		printf("%d ", delta[i]);
 }
+//*/
 
-static int _search(char *origin, int len_origin, char *sub, int len_sub, Self_Malloc mallocer)
+static int _search(const char *origin, int len_origin, const char *sub, int len_sub, Self_Malloc mallocer)
 {
 	if (0 == len_origin || 0 == len_sub || len_sub > len_origin)
 		return -1;
@@ -133,12 +130,7 @@ static int _search(char *origin, int len_origin, char *sub, int len_sub, Self_Ma
 	return -1;
 }
 
-int boyer_moore_string_search(char *origin, char *sub)
+int boyer_moore_string_search(const char *origin, const char *sub)
 {
 	return _search(origin, strlen(origin), sub, strlen(sub), MALLOC_METHOD);
 }
-
-
-#ifdef __cplusplus
-}
-#endif
