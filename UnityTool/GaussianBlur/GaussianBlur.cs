@@ -10,77 +10,18 @@
 */﻿
 
 using System.Collections;
+using System;
+using System.Threading;
 
 namespace Mard.Tools.Blur
 {
-
-	public struct RGBA
-	{
-		public byte r;
-		public byte g;
-		public byte b;
-		public byte a;
-
-		public void Reset()
-		{
-			r = 0;
-			g = 0;
-			b = 0;
-			a = 0;
-		}
-
-		public void Revert()
-		{
-			r = (byte)(byte.MaxValue - r);
-			g = (byte)(byte.MaxValue - g);
-			b = (byte)(byte.MaxValue - b);
-			a = (byte)(byte.MaxValue - a);
-		}
-
-		public void Parse(int v)
-		{
-			r = (byte)(v >> 24);
-			g = (byte)(v >> 16);
-			b = (byte)(v >> 8);
-			a = (byte)(v);
-		}
-
-		public int Convert2Int()
-		{
-			return r << 24 | g << 16 | b << 8 | a;
-		}
-
-		public static RGBA operator+(RGBA l, RGBA r)
-		{
-			l.r += r.r;
-			l.g += r.g;
-			l.b += r.b;
-			l.a += r.a;
-			return l;
-		}
-
-		public static RGBA operator*(RGBA l, float r)
-		{
-			l.r = (byte)(l.r * r);
-			l.g = (byte)(l.g * r);
-			l.b = (byte)(l.b * r);
-			l.a = (byte)(l.a * r);
-
-			return l;
-		}
-
-		public static explicit operator int(RGBA l)
-		{
-			return l.Convert2Int ();
-		}
-	}
 	public class GaussianBlur
 	{
 
 		/// <summary>
 		/// default Gaussian matrix which standard deviation=2, radius=3
 		/// </summary>
-		private static readonly float[] rDefaultMatrix = new float[]{
+		public static readonly float[] rDefaultMatrix = new float[]{
 			0.004193702f,	0.007834867f,	0.01139966f,	0.01291751f,	0.01139966f,	0.007834867f,	0.004193702f,
 			0.007834867f,	0.01463746f,	0.02129737f,	0.02413309f,	0.02129737f,	0.01463746f,	0.007834867f,
 			0.01139966f,	0.02129737f,	0.0309875f,		0.03511344f,	0.0309875f,		0.02129737f,	0.01139966f,
@@ -89,18 +30,26 @@ namespace Mard.Tools.Blur
 			0.007834867f,	0.01463746f,	0.02129737f,	0.02413309f,	0.02129737f,	0.01463746f,	0.007834867f,
 			0.004193702f,	0.007834867f,	0.01139966f,	0.01291751f,	0.01139966f,	0.007834867f,	0.004193702f,
 		};
-		private const float cDefaultSd = 2f;
-		private const int cDefaultRadius = 3;
+		public const float cDefaultSd = 2f;
+		public const int cDefaultRadius = 3;
 
-		public static void Blur(int[] src, int width, int height, int[] dst)
+		public static void Blur32(byte[] src, int width, int height, byte[] dst)
 		{
-			Blur (src, width, height, rDefaultMatrix, cDefaultSd, cDefaultRadius, dst);
+			Blur32 (src, width, height, rDefaultMatrix, cDefaultSd, cDefaultRadius, dst);
 		}
 
-		public static void Blur(int[] src, int width, int height, float[] matrix, float sd, int radius, int[] dst)
+		public static void Blur32(byte[] src, int width, int height, float sd, int radius, byte[] dst)
 		{
-			RGBA tmp = new RGBA();
-			RGBA tmp1 = new RGBA();
+			if (sd == cDefaultSd && radius == cDefaultRadius)
+				Blur32 (src, width, height, rDefaultMatrix, cDefaultSd, cDefaultRadius, dst);
+			else 
+				Blur32 (src, width, height, GaussianMatrixGen.GetGaussianMatrixIn2d(sd, radius), sd, radius, dst);
+		}
+
+		public static void Blur32(byte[] src, int width, int height, float[] matrix, float sd, int radius, byte[] dst)
+		{
+			float r, g, b, a;
+			float rr, gg, bb, aa;
 			int w;
 			int w_offset;
 			int h;
@@ -125,16 +74,339 @@ namespace Mard.Tools.Blur
 						w_offset = radius - x;
 					}
 
-					tmp.Reset ();
+					r = g = b = a = 0;
 					for (int i = 0; i + h_offset < matrixlen && i + h < height; i++) {
 						for (int j = 0; j + w_offset < matrixlen && j + w < width; j++) {
-							tmp1.Parse (src [(i + h) * width + j + w]);
-							//tmp1.Revert ();
-							tmp += tmp1 * matrix[(i + h_offset) * matrixlen + j + w_offset];
+							rr = src [((i + h) * width + j + w) * 4 + 0];
+							gg = src [((i + h) * width + j + w) * 4 + 1];
+							bb = src [((i + h) * width + j + w) * 4 + 2];
+							aa = src [((i + h) * width + j + w) * 4 + 3];
+
+							r += rr * matrix[(i + h_offset) * matrixlen + j + w_offset];
+							g += gg * matrix[(i + h_offset) * matrixlen + j + w_offset];
+							b += bb * matrix[(i + h_offset) * matrixlen + j + w_offset];
+							a += aa * matrix[(i + h_offset) * matrixlen + j + w_offset];
 						}
 					}
-					//tmp.Revert ();
-					dst [y * width + x] = (int)tmp;
+					dst [(y * width + x) * 4 + 0] = (byte)r;
+					dst [(y * width + x) * 4 + 1] = (byte)g;
+					dst [(y * width + x) * 4 + 2] = (byte)b;
+					dst [(y * width + x) * 4 + 3] = (byte)a;
+				}
+			}
+		}
+
+		public static void Blur32Horizontal(byte[] src, int width, int height, int row, byte[] dst)
+		{
+			Blur32Horizontal (src, width, height, rDefaultMatrix, cDefaultSd, cDefaultRadius, row, dst);
+		}
+
+		public static void Blur32Horizontal(byte[] src, int width, int height, float sd, int radius, int row, byte[] dst)
+		{
+			if (sd == cDefaultSd && radius == cDefaultRadius)
+				Blur32Horizontal (src, width, height, rDefaultMatrix, cDefaultSd, cDefaultRadius, row, dst);
+			else 
+				Blur32Horizontal (src, width, height, GaussianMatrixGen.GetGaussianMatrixIn2d(sd, radius), sd, radius, row, dst);
+		}
+
+		public static void Blur32Horizontal(byte[] src, int width, int height, float[] matrix, float sd, int radius, int row, byte[] dst)
+		{
+			float r, g, b, a;
+			float rr, gg, bb, aa;
+			int w;
+			int w_offset;
+			int h;
+			int h_offset;
+
+			int matrixlen = radius + radius + 1;
+			int i = row;
+
+			for (int y = 0; y < height; y++) {
+				for (int x = 0; x < width; x++) {
+					if (y - radius >= 0) {
+						h = y - radius;
+						h_offset = 0;
+					} else {
+						h = 0;
+						h_offset = radius - y;
+					}
+					if (x - radius >= 0) {
+						w = x - radius;
+						w_offset = 0;
+					} else {
+						w = 0;
+						w_offset = radius - x;
+					}
+
+					r = g = b = a = 0;
+					if (i + h_offset < matrixlen && i + h < height) {
+						for (int j = 0; j + w_offset < matrixlen && j + w < width; j++) {
+							rr = src [((i + h) * width + j + w) * 4 + 0];
+							gg = src [((i + h) * width + j + w) * 4 + 1];
+							bb = src [((i + h) * width + j + w) * 4 + 2];
+							aa = src [((i + h) * width + j + w) * 4 + 3];
+
+							r += rr * matrix[(i + h_offset) * matrixlen + j + w_offset];
+							g += gg * matrix[(i + h_offset) * matrixlen + j + w_offset];
+							b += bb * matrix[(i + h_offset) * matrixlen + j + w_offset];
+							a += aa * matrix[(i + h_offset) * matrixlen + j + w_offset];
+						}
+						dst [(y * width + x) * 4 + 0] += (byte)r;
+						dst [(y * width + x) * 4 + 1] += (byte)g;
+						dst [(y * width + x) * 4 + 2] += (byte)b;
+						dst [(y * width + x) * 4 + 3] += (byte)a;
+					}
+				}
+			}
+		}
+
+		public static void Blur32Vertical(byte[] src, int width, int height, int column, byte[] dst)
+		{
+			Blur32Vertical (src, width, height, rDefaultMatrix, cDefaultSd, cDefaultRadius, column, dst);
+		}
+
+		public static void Blur32Vertical(byte[] src, int width, int height, float sd, int radius, int column, byte[] dst)
+		{
+			if (sd == cDefaultSd && radius == cDefaultRadius)
+				Blur32Vertical (src, width, height, rDefaultMatrix, cDefaultSd, cDefaultRadius, column, dst);
+			else 
+				Blur32Vertical (src, width, height, GaussianMatrixGen.GetGaussianMatrixIn2d(sd, radius), sd, radius, column, dst);
+		}
+
+		public static void Blur32Vertical(byte[] src, int width, int height, float[] matrix, float sd, int radius, int column, byte[] dst)
+		{
+			float r, g, b, a;
+			float rr, gg, bb, aa;
+			int w;
+			int w_offset;
+			int h;
+			int h_offset;
+
+			int matrixlen = radius + radius + 1;
+			int j = column;
+
+			for (int y = 0; y < height; y++) {
+				for (int x = 0; x < width; x++) {
+					if (y - radius >= 0) {
+						h = y - radius;
+						h_offset = 0;
+					} else {
+						h = 0;
+						h_offset = radius - y;
+					}
+					if (x - radius >= 0) {
+						w = x - radius;
+						w_offset = 0;
+					} else {
+						w = 0;
+						w_offset = radius - x;
+					}
+
+					r = g = b = a = 0;
+					if (j + w_offset < matrixlen && j + w < width) {
+						for (int i = 0; i + h_offset < matrixlen && i + h < height; i++) {
+
+							rr = src [((i + h) * width + j + w) * 4 + 0];
+							gg = src [((i + h) * width + j + w) * 4 + 1];
+							bb = src [((i + h) * width + j + w) * 4 + 2];
+							aa = src [((i + h) * width + j + w) * 4 + 3];
+
+							r += rr * matrix[(i + h_offset) * matrixlen + j + w_offset];
+							g += gg * matrix[(i + h_offset) * matrixlen + j + w_offset];
+							b += bb * matrix[(i + h_offset) * matrixlen + j + w_offset];
+							a += aa * matrix[(i + h_offset) * matrixlen + j + w_offset];
+						}
+						dst [(y * width + x) * 4 + 0] += (byte)r;
+						dst [(y * width + x) * 4 + 1] += (byte)g;
+						dst [(y * width + x) * 4 + 2] += (byte)b;
+						dst [(y * width + x) * 4 + 3] += (byte)a;
+					}
+				}
+			}
+		}
+
+
+
+		public static void Blur24(byte[] src, int width, int height, byte[] dst)
+		{
+			Blur24 (src, width, height, rDefaultMatrix, cDefaultSd, cDefaultRadius, dst);
+
+		}
+
+		public static void Blur24(byte[] src, int width, int height, float sd, int radius, byte[] dst)
+		{
+			if (sd == cDefaultSd && radius == cDefaultRadius)
+				Blur24 (src, width, height, rDefaultMatrix, cDefaultSd, cDefaultRadius, dst);
+			else 
+				Blur24 (src, width, height, GaussianMatrixGen.GetGaussianMatrixIn2d(sd, radius), sd, radius, dst);
+		}
+
+		public static void Blur24(byte[] src, int width, int height, float[] matrix, float sd, int radius, byte[] dst)
+		{
+			float r, g, b;
+			float rr, gg, bb;
+			int w;
+			int w_offset;
+			int h;
+			int h_offset;
+
+			int matrixlen = radius + radius + 1;
+
+			for (int y = 0; y < height; y++) {
+				for (int x = 0; x < width; x++) {
+					if (y - radius >= 0) {
+						h = y - radius;
+						h_offset = 0;
+					} else {
+						h = 0;
+						h_offset = radius - y;
+					}
+					if (x - radius >= 0) {
+						w = x - radius;
+						w_offset = 0;
+					} else {
+						w = 0;
+						w_offset = radius - x;
+					}
+
+					r = g = b = 0;
+					for (int i = 0; i + h_offset < matrixlen && i + h < height; i++) {
+						for (int j = 0; j + w_offset < matrixlen && j + w < width; j++) {
+							rr = src [((i + h) * width + j + w) * 3 + 0];
+							gg = src [((i + h) * width + j + w) * 3 + 1];
+							bb = src [((i + h) * width + j + w) * 3 + 2];
+
+							r += rr * matrix[(i + h_offset) * matrixlen + j + w_offset];
+							g += gg * matrix[(i + h_offset) * matrixlen + j + w_offset];
+							b += bb * matrix[(i + h_offset) * matrixlen + j + w_offset];
+						}
+					}
+					dst [(y * width + x) * 3 + 0] = (byte)r;
+					dst [(y * width + x) * 3 + 1] = (byte)g;
+					dst [(y * width + x) * 3 + 2] = (byte)b;
+				}
+			}
+		}
+
+		public static void Blur24Horizontal(byte[] src, int width, int height, int row, byte[] dst)
+		{
+			Blur24Horizontal (src, width, height, rDefaultMatrix, cDefaultSd, cDefaultRadius, row, dst);
+		}
+
+		public static void Blur24Horizontal(byte[] src, int width, int height, float sd, int radius, int row, byte[] dst)
+		{
+			if (sd == cDefaultSd && radius == cDefaultRadius)
+				Blur24Horizontal (src, width, height, rDefaultMatrix, cDefaultSd, cDefaultRadius, row, dst);
+			else 
+				Blur24Horizontal (src, width, height, GaussianMatrixGen.GetGaussianMatrixIn2d(sd, radius), sd, radius, row, dst);
+		}
+
+		public static void Blur24Horizontal(byte[] src, int width, int height, float[] matrix, float sd, int radius, int row, byte[] dst)
+		{
+			float r, g, b;
+			float rr, gg, bb;
+			int w;
+			int w_offset;
+			int h;
+			int h_offset;
+
+			int matrixlen = radius + radius + 1;
+			int i = row;
+
+			for (int y = 0; y < height; y++) {
+				for (int x = 0; x < width; x++) {
+					if (y - radius >= 0) {
+						h = y - radius;
+						h_offset = 0;
+					} else {
+						h = 0;
+						h_offset = radius - y;
+					}
+					if (x - radius >= 0) {
+						w = x - radius;
+						w_offset = 0;
+					} else {
+						w = 0;
+						w_offset = radius - x;
+					}
+
+					r = g = b = 0;
+					if (i + h_offset < matrixlen && i + h < height) {
+						for (int j = 0; j + w_offset < matrixlen && j + w < width; j++) {
+							rr = src [((i + h) * width + j + w) * 3 + 0];
+							gg = src [((i + h) * width + j + w) * 3 + 1];
+							bb = src [((i + h) * width + j + w) * 3 + 2];
+
+							r += rr * matrix[(i + h_offset) * matrixlen + j + w_offset];
+							g += gg * matrix[(i + h_offset) * matrixlen + j + w_offset];
+							b += bb * matrix[(i + h_offset) * matrixlen + j + w_offset];
+						}
+						dst [(y * width + x) * 3 + 0] += (byte)r;
+						dst [(y * width + x) * 3 + 1] += (byte)g;
+						dst [(y * width + x) * 3 + 2] += (byte)b;
+					}
+				}
+			}
+		}
+
+		public static void Blur24Vertical(byte[] src, int width, int height, int column, byte[] dst)
+		{
+			Blur24Vertical (src, width, height, rDefaultMatrix, cDefaultSd, cDefaultRadius, column, dst);
+		}
+
+		public static void Blur24Vertical(byte[] src, int width, int height, float sd, int radius, int column, byte[] dst)
+		{
+			if (sd == cDefaultSd && radius == cDefaultRadius)
+				Blur24Vertical (src, width, height, rDefaultMatrix, cDefaultSd, cDefaultRadius, column, dst);
+			else 
+				Blur24Vertical (src, width, height, GaussianMatrixGen.GetGaussianMatrixIn2d(sd, radius), sd, radius, column, dst);
+		}
+
+		public static void Blur24Vertical(byte[] src, int width, int height, float[] matrix, float sd, int radius, int column, byte[] dst)
+		{
+			float r, g, b;
+			float rr, gg, bb;
+			int w;
+			int w_offset;
+			int h;
+			int h_offset;
+
+			int matrixlen = radius + radius + 1;
+			int j = column;
+
+			for (int y = 0; y < height; y++) {
+				for (int x = 0; x < width; x++) {
+					if (y - radius >= 0) {
+						h = y - radius;
+						h_offset = 0;
+					} else {
+						h = 0;
+						h_offset = radius - y;
+					}
+					if (x - radius >= 0) {
+						w = x - radius;
+						w_offset = 0;
+					} else {
+						w = 0;
+						w_offset = radius - x;
+					}
+
+					r = g = b = 0;
+					if (j + w_offset < matrixlen && j + w < width) {
+						for (int i = 0; i + h_offset < matrixlen && i + h < height; i++) {
+
+							rr = src [((i + h) * width + j + w) * 3 + 0];
+							gg = src [((i + h) * width + j + w) * 3 + 1];
+							bb = src [((i + h) * width + j + w) * 3 + 2];
+
+							r += rr * matrix[(i + h_offset) * matrixlen + j + w_offset];
+							g += gg * matrix[(i + h_offset) * matrixlen + j + w_offset];
+							b += bb * matrix[(i + h_offset) * matrixlen + j + w_offset];
+						}
+						dst [(y * width + x) * 3 + 0] += (byte)r;
+						dst [(y * width + x) * 3 + 1] += (byte)g;
+						dst [(y * width + x) * 3 + 2] += (byte)b;
+					}
 				}
 			}
 		}
