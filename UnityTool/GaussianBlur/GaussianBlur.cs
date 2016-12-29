@@ -22,13 +22,13 @@ namespace Mard.Tools.Blur
 		/// default Gaussian matrix which standard deviation=2, radius=3
 		/// </summary>
 		public static readonly float[] rDefaultMatrix = new float[]{
-			0.004193702f,	0.007834867f,	0.01139966f,	0.01291751f,	0.01139966f,	0.007834867f,	0.004193702f,
-			0.007834867f,	0.01463746f,	0.02129737f,	0.02413309f,	0.02129737f,	0.01463746f,	0.007834867f,
-			0.01139966f,	0.02129737f,	0.0309875f,		0.03511344f,	0.0309875f,		0.02129737f,	0.01139966f,
-			0.01291751f,	0.02413309f,	0.03511344f,	0.03978873f,	0.03511344f,	0.02413309f,	0.01291751f,
-			0.01139966f,	0.02129737f,	0.0309875f,		0.03511344f,	0.0309875f,		0.02129737f,	0.01139966f,
-			0.007834867f,	0.01463746f,	0.02129737f,	0.02413309f,	0.02129737f,	0.01463746f,	0.007834867f,
-			0.004193702f,	0.007834867f,	0.01139966f,	0.01291751f,	0.01139966f,	0.007834867f,	0.004193702f,
+			0.00492233f,	0.009196123f,	0.01338028f,	0.01516184f,	0.01338028f,	0.009196123f,	0.00492233f,
+			0.009196123f,	0.01718062f,	0.02499765f,	0.02832605f,	0.02499765f,	0.01718062f,	0.009196123f,
+			0.01338028f,	0.02499765f,	0.03637137f,	0.04121416f,	0.03637137f,	0.02499765f,	0.01338028f,
+			0.01516184f,	0.02832605f,	0.04121416f,	0.04670176f,	0.04121416f,	0.02832605f,	0.01516184f,
+			0.01338028f,	0.02499765f,	0.03637137f,	0.04121416f,	0.03637137f,	0.02499765f,	0.01338028f,
+			0.009196123f,	0.01718062f,	0.02499765f,	0.02832605f,	0.02499765f,	0.01718062f,	0.009196123f,
+			0.00492233f,	0.009196123f,	0.01338028f,	0.01516184f,	0.01338028f,	0.009196123f,	0.00492233f,
 		};
 		public const float cDefaultSd = 2f;
 		public const int cDefaultRadius = 3;
@@ -42,7 +42,7 @@ namespace Mard.Tools.Blur
 		{
 			if (sd == cDefaultSd && radius == cDefaultRadius)
 				Blur32 (src, width, height, rDefaultMatrix, cDefaultSd, cDefaultRadius, dst);
-			else 
+			else
 				Blur32 (src, width, height, GaussianMatrixGen.GetGaussianMatrixIn2d(sd, radius), sd, radius, dst);
 		}
 
@@ -105,7 +105,7 @@ namespace Mard.Tools.Blur
 		{
 			if (sd == cDefaultSd && radius == cDefaultRadius)
 				Blur32Horizontal (src, width, height, rDefaultMatrix, cDefaultSd, cDefaultRadius, row, dst);
-			else 
+			else
 				Blur32Horizontal (src, width, height, GaussianMatrixGen.GetGaussianMatrixIn2d(sd, radius), sd, radius, row, dst);
 		}
 
@@ -169,7 +169,7 @@ namespace Mard.Tools.Blur
 		{
 			if (sd == cDefaultSd && radius == cDefaultRadius)
 				Blur32Vertical (src, width, height, rDefaultMatrix, cDefaultSd, cDefaultRadius, column, dst);
-			else 
+			else
 				Blur32Vertical (src, width, height, GaussianMatrixGen.GetGaussianMatrixIn2d(sd, radius), sd, radius, column, dst);
 		}
 
@@ -237,7 +237,7 @@ namespace Mard.Tools.Blur
 		{
 			if (sd == cDefaultSd && radius == cDefaultRadius)
 				Blur24 (src, width, height, rDefaultMatrix, cDefaultSd, cDefaultRadius, dst);
-			else 
+			else
 				Blur24 (src, width, height, GaussianMatrixGen.GetGaussianMatrixIn2d(sd, radius), sd, radius, dst);
 		}
 
@@ -297,7 +297,7 @@ namespace Mard.Tools.Blur
 		{
 			if (sd == cDefaultSd && radius == cDefaultRadius)
 				Blur24Horizontal (src, width, height, rDefaultMatrix, cDefaultSd, cDefaultRadius, row, dst);
-			else 
+			else
 				Blur24Horizontal (src, width, height, GaussianMatrixGen.GetGaussianMatrixIn2d(sd, radius), sd, radius, row, dst);
 		}
 
@@ -358,7 +358,7 @@ namespace Mard.Tools.Blur
 		{
 			if (sd == cDefaultSd && radius == cDefaultRadius)
 				Blur24Vertical (src, width, height, rDefaultMatrix, cDefaultSd, cDefaultRadius, column, dst);
-			else 
+			else
 				Blur24Vertical (src, width, height, GaussianMatrixGen.GetGaussianMatrixIn2d(sd, radius), sd, radius, column, dst);
 		}
 

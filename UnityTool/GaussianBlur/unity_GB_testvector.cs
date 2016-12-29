@@ -113,11 +113,11 @@ public class unity_GB_testvector : MonoBehaviour {
 		ts = DateTime.Now - dt;
 		print ("blur32_4: " + ts);
 		dt = DateTime.Now;
-		GaussianBlur.Blur32 (data, tex32.width, tex32.height, result_32);
+		GaussianBlur.Blur32 (data, tex32.width, tex32.height, 0.84089642f, 1, result_32);
 		ts = DateTime.Now - dt;
 		print ("blur32: " + ts);
 		dt = DateTime.Now;
-		GaussianBlur.Blur32 (data, tex32.width, tex32.height, result_32);
+		//GaussianBlur.Blur32 (data, tex32.width, tex32.height, result_32);
 		//for (int i = 0; i < GaussianBlur.cDefaultRadius + GaussianBlur.cDefaultRadius + 1; i++)
 		//	GaussianBlur.Blur32Horizontal (data, tex32.width, tex32.height, i, result_32h);
 		ts = DateTime.Now - dt;
@@ -130,16 +130,19 @@ public class unity_GB_testvector : MonoBehaviour {
 		dt = DateTime.Now;
 		result_32_src = data;
 		result_32_dst = result_32_repeat;
-		float sd = 1.0f;
+		float sd = 0.5f;
 		int r = 3;
 		float[] matrix = GaussianMatrixGen.GetGaussianMatrixIn2d (sd, r);
 		for (int i = 0; i < r + r + 1; i++) {
 			GaussianBlur.Blur32Horizontal (result_32_src, tex32.width, tex32.height, matrix, sd, r, i, result_32_dst);
-			GaussianBlur.Blur32Vertical (result_32_dst, tex32.width, tex32.height, matrix, sd, r, i, result_32_src);
-			//result_32_tmp = result_32_dst;
-			//result_32_dst = result_32_src;
-			//result_32_src = result_32_tmp;
 		}
+		ts = DateTime.Now - dt;
+		print ("blur32-repeat: " + ts);
+		dt = DateTime.Now;
+		sd = 0.84089642f;
+		r = 3;
+		matrix = GaussianMatrixGen.GetGaussianMatrixInLinear (sd, r);
+		GaussianBlur.Blur32Horizontal (result_32_src, tex32.width, tex32.height, matrix, sd, r, 1, result_32_dst);
 		ts = DateTime.Now - dt;
 		print ("blur32-repeat: " + ts);
 

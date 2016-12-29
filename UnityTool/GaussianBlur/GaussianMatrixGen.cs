@@ -74,6 +74,15 @@ namespace Mard.Tools.Blur
 				}
 			}
 
+			float total = 0.0f;
+			int count = result.Length;
+			for (int i = 0; i < count; i++) {
+				total += result [i];
+			}
+			for (int i = 0; i < count; i++) {
+				result [i] /= total;
+			}
+
 			return result;
 		}
 
@@ -83,7 +92,7 @@ namespace Mard.Tools.Blur
 		/// <returns>gaussian matrix[1xn] in array</returns>
 		/// <param name="sd">standard deviation(σ)</param>
 		/// <param name="r">radius</param>
-		public static float[] GetGaussianMatrixIn(float sd, int r)
+		public static float[] GetGaussianMatrixInLinear(float sd, int r)
 		{
 			float[] result = new float[(r + r + 1)];
 
@@ -93,6 +102,15 @@ namespace Mard.Tools.Blur
 
 			for (int x = 0; x < r; x++) {
 				result [x] = result [r + r - x];
+			}
+
+			float total = 0.0f;
+			int count = result.Length;
+			for (int i = 0; i < count; i++) {
+				total += result [i];
+			}
+			for (int i = 0; i < count; i++) {
+				result [i] /= total;
 			}
 
 			return result;
