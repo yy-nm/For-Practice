@@ -57,11 +57,11 @@ public class unity_GB_testvector : MonoBehaviour {
 
 		TimeSpan ts;
 		DateTime dt = DateTime.Now;
-		//GaussianBlur.Blur24 (data, tex24.width, tex24.height, 1, 5, result_24_4);
+		GaussianBlur.Blur24 (data, tex24.width, tex24.height, 1, 5, result_24_4);
 		ts = DateTime.Now - dt;
 		print ("blur24_4: " + ts);
 		dt = DateTime.Now;
-		//GaussianBlur.Blur24 (data, tex24.width, tex24.height, result_24);
+		GaussianBlur.Blur24 (data, tex24.width, tex24.height, result_24);
 		ts = DateTime.Now - dt;
 		print ("blur24: " + ts);
 		dt = DateTime.Now;
@@ -75,9 +75,9 @@ public class unity_GB_testvector : MonoBehaviour {
 		ts = DateTime.Now - dt;
 		print ("blur24v: " + ts);
 
-		//Texture2D t24 = new Texture2D(tex24.width, tex24.height, TextureFormat.RGB24, false, true);
-		//t24.LoadRawTextureData (result_24);
-		//File.WriteAllBytes(Path.Combine(Application.dataPath, "test_gaussianblur24.png"), t24.EncodeToPNG());
+		Texture2D t24 = new Texture2D(tex24.width, tex24.height, TextureFormat.RGB24, false, true);
+		t24.LoadRawTextureData (result_24);
+		File.WriteAllBytes(Path.Combine(Application.dataPath, "test_gaussianblur24.png"), t24.EncodeToPNG());
 
 		Texture2D t24h = new Texture2D(tex24.width, tex24.height, TextureFormat.RGB24, false, true);
 		t24h.LoadRawTextureData (result_24h);
@@ -87,9 +87,9 @@ public class unity_GB_testvector : MonoBehaviour {
 		t24v.LoadRawTextureData (result_24v);
 		File.WriteAllBytes(Path.Combine(Application.dataPath, "test_gaussianblur24v.png"), t24v.EncodeToPNG());
 
-		//Texture2D t24_4 = new Texture2D(tex24.width, tex24.height, TextureFormat.RGB24, false, true);
-		//t24_4.LoadRawTextureData (result_24_4);
-		//File.WriteAllBytes(Path.Combine(Application.dataPath, "test_gaussianblur24_4.png"), t24_4.EncodeToPNG());
+		Texture2D t24_4 = new Texture2D(tex24.width, tex24.height, TextureFormat.RGB24, false, true);
+		t24_4.LoadRawTextureData (result_24_4);
+		File.WriteAllBytes(Path.Combine(Application.dataPath, "test_gaussianblur24_4.png"), t24_4.EncodeToPNG());
 	}
 
 	public void Test32()
@@ -112,22 +112,22 @@ public class unity_GB_testvector : MonoBehaviour {
 
 		TimeSpan ts;
 		DateTime dt = DateTime.Now;
-		//GaussianBlur.Blur32 (data, tex32.width, tex32.height, 2, 4, result_32_4);
+		GaussianBlur.Blur32 (data, tex32.width, tex32.height, 2, 4, result_32_4);
 		ts = DateTime.Now - dt;
 		print ("blur32_4: " + ts);
 		dt = DateTime.Now;
-		GaussianBlur.Blur32 (data, tex32.width, tex32.height, 100.5f, 3, result_32);
+		GaussianBlur.Blur32 (data, tex32.width, tex32.height, 2.0f, 3, result_32);
 		ts = DateTime.Now - dt;
 		print ("blur32: " + ts);
 		dt = DateTime.Now;
 		//GaussianBlur.Blur32 (data, tex32.width, tex32.height, result_32);
-		//for (int i = 0; i < GaussianBlur.cDefaultRadius + GaussianBlur.cDefaultRadius + 1; i++)
-		//	GaussianBlur.Blur32Horizontal (data, tex32.width, tex32.height, i, result_32h);
+		for (int i = 0; i < GaussianBlur.cDefaultRadius + GaussianBlur.cDefaultRadius + 1; i++)
+			GaussianBlur.Blur32Horizontal (data, tex32.width, tex32.height, i, result_32h);
 		ts = DateTime.Now - dt;
 		print ("blur32h: " + ts);
 		dt = DateTime.Now;
-		//for (int i = 0; i < GaussianBlur.cDefaultRadius + GaussianBlur.cDefaultRadius + 1; i++)
-		//	GaussianBlur.Blur32Vertical (data, tex32.width, tex32.height, i, result_32v);
+		for (int i = 0; i < GaussianBlur.cDefaultRadius + GaussianBlur.cDefaultRadius + 1; i++)
+			GaussianBlur.Blur32Vertical (data, tex32.width, tex32.height, i, result_32v);
 		ts = DateTime.Now - dt;
 		print ("blur32v: " + ts);
 		dt = DateTime.Now;
@@ -159,17 +159,17 @@ public class unity_GB_testvector : MonoBehaviour {
 		t32.LoadRawTextureData (result_32);
 		File.WriteAllBytes(Path.Combine(Application.dataPath, "test_gaussianblur32.png"), t32.EncodeToPNG());
 
-		//Texture2D t32_4 = new Texture2D(tex32.width, tex32.height, TextureFormat.RGBA32, false, true);
-		//t32_4.LoadRawTextureData (result_32_4);
-		//File.WriteAllBytes(Path.Combine(Application.dataPath, "test_gaussianblur32_4.png"), t32_4.EncodeToPNG());
+		Texture2D t32_4 = new Texture2D(tex32.width, tex32.height, TextureFormat.RGBA32, false, true);
+		t32_4.LoadRawTextureData (result_32_4);
+		File.WriteAllBytes(Path.Combine(Application.dataPath, "test_gaussianblur32_4.png"), t32_4.EncodeToPNG());
 
-		//Texture2D t32h = new Texture2D(tex32.width, tex32.height, TextureFormat.RGBA32, false, true);
-		//t32h.LoadRawTextureData (result_32h);
-		//File.WriteAllBytes(Path.Combine(Application.dataPath, "test_gaussianblur32h.png"), t32h.EncodeToPNG());
+		Texture2D t32h = new Texture2D(tex32.width, tex32.height, TextureFormat.RGBA32, false, true);
+		t32h.LoadRawTextureData (result_32h);
+		File.WriteAllBytes(Path.Combine(Application.dataPath, "test_gaussianblur32h.png"), t32h.EncodeToPNG());
 
-		//Texture2D t32v = new Texture2D(tex32.width, tex32.height, TextureFormat.RGBA32, false, true);
-		//t32v.LoadRawTextureData (result_32v);
-		//File.WriteAllBytes(Path.Combine(Application.dataPath, "test_gaussianblur32v.png"), t32v.EncodeToPNG());
+		Texture2D t32v = new Texture2D(tex32.width, tex32.height, TextureFormat.RGBA32, false, true);
+		t32v.LoadRawTextureData (result_32v);
+		File.WriteAllBytes(Path.Combine(Application.dataPath, "test_gaussianblur32v.png"), t32v.EncodeToPNG());
 
 		Texture2D t32repeat = new Texture2D(tex32.width, tex32.height, TextureFormat.RGBA32, false, true);
 		t32repeat.LoadRawTextureData (result_32_dst);

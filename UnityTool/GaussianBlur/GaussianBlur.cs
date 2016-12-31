@@ -54,6 +54,8 @@ namespace Mard.Tools.Blur
 			int w_offset;
 			int h;
 			int h_offset;
+			float mvalue;
+			int pos;
 
 			int matrixlen = radius + radius + 1;
 
@@ -77,21 +79,133 @@ namespace Mard.Tools.Blur
 					r = g = b = a = 0;
 					for (int i = 0; i + h_offset < matrixlen && i + h < height; i++) {
 						for (int j = 0; j + w_offset < matrixlen && j + w < width; j++) {
-							rr = src [((i + h) * width + j + w) * 4 + 0];
-							gg = src [((i + h) * width + j + w) * 4 + 1];
-							bb = src [((i + h) * width + j + w) * 4 + 2];
-							aa = src [((i + h) * width + j + w) * 4 + 3];
+							mvalue = matrix[(i + h_offset) * matrixlen + j + w_offset];
+							pos = ((i + h) * width + j + w) * 4;
+							rr = src [pos + 0];
+							gg = src [pos + 1];
+							bb = src [pos + 2];
+							aa = src [pos + 3];
 
-							r += rr * matrix[(i + h_offset) * matrixlen + j + w_offset];
-							g += gg * matrix[(i + h_offset) * matrixlen + j + w_offset];
-							b += bb * matrix[(i + h_offset) * matrixlen + j + w_offset];
-							a += aa * matrix[(i + h_offset) * matrixlen + j + w_offset];
+							r += rr * mvalue;
+							g += gg * mvalue;
+							b += bb * mvalue;
+							a += aa * mvalue;
 						}
 					}
-					dst [(y * width + x) * 4 + 0] = (byte)r;
-					dst [(y * width + x) * 4 + 1] = (byte)g;
-					dst [(y * width + x) * 4 + 2] = (byte)b;
-					dst [(y * width + x) * 4 + 3] = (byte)a;
+
+					if (h_offset > 0 || w_offset > 0) {
+						// handle with matrix which x < 0 and y < 0 part
+						for (int i = h_offset - 1; i >= 0; i--) {
+							for (int j = w_offset - 1; j >= 0; j--) {
+								mvalue = matrix[i * matrixlen + j];
+								pos = ((height + i - h_offset - 1) * width + width + j -  w_offset - 1) * 4;
+
+								rr = src [pos + 0];
+								gg = src [pos + 1];
+								bb = src [pos + 2];
+								aa = src [pos + 3];
+
+								r += rr * mvalue;
+								g += gg * mvalue;
+								b += bb * mvalue;
+								a += aa * mvalue;
+							}
+						}
+						// handle with matrix which x < 0 and y >= 0 part
+						for (int i = 0; i + h_offset < matrixlen && i + h < height; i++) {
+							for (int j = w_offset - 1; j >= 0; j--) {
+								mvalue = matrix[(i + h_offset) * matrixlen + j];
+								pos = ((i + h) * width + width + j -  w_offset - 1) * 4;
+
+								rr = src [pos + 0];
+								gg = src [pos + 1];
+								bb = src [pos + 2];
+								aa = src [pos + 3];
+
+								r += rr * mvalue;
+								g += gg * mvalue;
+								b += bb * mvalue;
+								a += aa * mvalue;
+							}
+						}
+
+						// handle with matrix which x >= 0 and y < 0 part
+						for (int i = h_offset - 1; i >= 0; i--) {
+							for (int j = 0; j + w_offset < matrixlen && j + w < width; j++) {
+								mvalue = matrix[i * matrixlen + j + w_offset];
+								pos = ((height + i - h_offset - 1) * width + j + w) * 4;
+
+								rr = src [pos + 0];
+								gg = src [pos + 1];
+								bb = src [pos + 2];
+								aa = src [pos + 3];
+
+								r += rr * mvalue;
+								g += gg * mvalue;
+								b += bb * mvalue;
+								a += aa * mvalue;
+							}
+						}
+					}
+
+					if (h + matrixlen > height || w + matrixlen > width) {
+						// handle with matrix which x >= width and y >= height part
+						for (int i = 0; h + matrixlen - i > height; i++) {
+							for (int j = 0; w + matrixlen - j > width; j++) {
+								mvalue = matrix[(matrixlen - i - 1) * matrixlen + matrixlen - j - 1];
+								pos = ((h + matrixlen - i - height - 1) * width + w + matrixlen - j - 1) * 4;
+								rr = src [pos + 0];
+								gg = src [pos + 1];
+								bb = src [pos + 2];
+								aa = src [pos + 3];
+
+								r += rr * mvalue;
+								g += gg * mvalue;
+								b += bb * mvalue;
+								a += aa * mvalue;
+							}
+						}
+
+						// handle with matrix which x >= width and y < height part
+						for (int i = 0; i + h_offset < matrixlen && i + h < height; i++) {
+							for (int j = 0; w + matrixlen - j > width; j++) {
+								mvalue = matrix[(i + h_offset) * matrixlen + matrixlen - j - 1];
+								pos = ((i + h - 1) * width + w + matrixlen - j - 1) * 4;
+								rr = src [pos + 0];
+								gg = src [pos + 1];
+								bb = src [pos + 2];
+								aa = src [pos + 3];
+
+								r += rr * mvalue;
+								g += gg * mvalue;
+								b += bb * mvalue;
+								a += aa * mvalue;
+							}
+						}
+
+						// handle with matrix which x < width and y >= height part
+						for (int i = 0; h + matrixlen - i > height; i++) {
+							for (int j = 0; j + w_offset < matrixlen && j + w < width; j++) {
+								mvalue = matrix[(matrixlen - i - 1) * matrixlen + j + w_offset];
+								pos = ((h + matrixlen - i - height - 1) * width + j + w) * 4;
+								rr = src [pos + 0];
+								gg = src [pos + 1];
+								bb = src [pos + 2];
+								aa = src [pos + 3];
+
+								r += rr * mvalue;
+								g += gg * mvalue;
+								b += bb * mvalue;
+								a += aa * mvalue;
+							}
+						}
+					}
+
+					pos = (y * width + x) * 4;
+					dst [pos + 0] = (byte)r;
+					dst [pos + 1] = (byte)g;
+					dst [pos + 2] = (byte)b;
+					dst [pos + 3] = (byte)a;
 				}
 			}
 		}
@@ -117,9 +231,14 @@ namespace Mard.Tools.Blur
 			int w_offset;
 			int h;
 			int h_offset;
+			float mvalue;
+			int pos;
 
 			int matrixlen = radius + radius + 1;
 			int i = row;
+
+			if (row >= matrixlen || row < 0)
+				return;
 
 			for (int y = 0; y < height; y++) {
 				for (int x = 0; x < width; x++) {
@@ -141,21 +260,133 @@ namespace Mard.Tools.Blur
 					r = g = b = a = 0;
 					if (i + h_offset < matrixlen && i + h < height) {
 						for (int j = 0; j + w_offset < matrixlen && j + w < width; j++) {
-							rr = src [((i + h) * width + j + w) * 4 + 0];
-							gg = src [((i + h) * width + j + w) * 4 + 1];
-							bb = src [((i + h) * width + j + w) * 4 + 2];
-							aa = src [((i + h) * width + j + w) * 4 + 3];
+							mvalue = matrix[(i + h_offset) * matrixlen + j + w_offset];
+							pos = ((i + h) * width + j + w) * 4;
+							rr = src [pos + 0];
+							gg = src [pos + 1];
+							bb = src [pos + 2];
+							aa = src [pos + 3];
 
-							r += rr * matrix[(i + h_offset) * matrixlen + j + w_offset];
-							g += gg * matrix[(i + h_offset) * matrixlen + j + w_offset];
-							b += bb * matrix[(i + h_offset) * matrixlen + j + w_offset];
-							a += aa * matrix[(i + h_offset) * matrixlen + j + w_offset];
+							r += rr * mvalue;
+							g += gg * mvalue;
+							b += bb * mvalue;
+							a += aa * mvalue;
 						}
-						dst [(y * width + x) * 4 + 0] += (byte)r;
-						dst [(y * width + x) * 4 + 1] += (byte)g;
-						dst [(y * width + x) * 4 + 2] += (byte)b;
-						dst [(y * width + x) * 4 + 3] += (byte)a;
 					}
+
+					if (h_offset >= i || w_offset > 0) {
+						// handle with matrix which x < 0 and y < 0 part
+						if (h_offset > i) {
+							for (int j = w_offset - 1; j >= 0; j--) {
+								mvalue = matrix[i * matrixlen + j];
+								pos = ((height + i - h_offset) * width + width + j -  w_offset - 1) * 4;
+
+								rr = src [pos + 0];
+								gg = src [pos + 1];
+								bb = src [pos + 2];
+								aa = src [pos + 3];
+
+								r += rr * mvalue;
+								g += gg * mvalue;
+								b += bb * mvalue;
+								a += aa * mvalue;
+							}
+						}
+						// handle with matrix which x < 0 and y >= 0 part
+						if (h_offset <= i && i + h < height && w_offset > 0) {
+							for (int j = w_offset - 1; j >= 0; j--) {
+								mvalue = matrix[i * matrixlen + j];
+								pos = ((i + h - h_offset) * width + width + j -  w_offset - 1) * 4;
+
+								rr = src [pos + 0];
+								gg = src [pos + 1];
+								bb = src [pos + 2];
+								aa = src [pos + 3];
+
+								r += rr * mvalue;
+								g += gg * mvalue;
+								b += bb * mvalue;
+								a += aa * mvalue;
+							}
+						}
+
+						// handle with matrix which x >= 0 and y < 0 part
+						if  (h_offset > i) {
+							for (int j = 0; j + w_offset < matrixlen && j + w < width; j++) {
+								mvalue = matrix[i * matrixlen + j + w_offset];
+								pos = ((height + i - h_offset) * width + j + w) * 4;
+
+								rr = src [pos + 0];
+								gg = src [pos + 1];
+								bb = src [pos + 2];
+								aa = src [pos + 3];
+
+								r += rr * mvalue;
+								g += gg * mvalue;
+								b += bb * mvalue;
+								a += aa * mvalue;
+							}
+						}
+					}
+
+					if (h + i + 1 > height || w + matrixlen > width) {
+						// handle with matrix which x >= width and y >= height part
+						if (h + i + 1 > height) {
+							for (int j = 0; w + matrixlen - j > width; j++) {
+								mvalue = matrix[i * matrixlen + matrixlen - j - 1];
+								pos = ((h + i - height) * width + w + matrixlen - j - 1) * 4;
+								rr = src [pos + 0];
+								gg = src [pos + 1];
+								bb = src [pos + 2];
+								aa = src [pos + 3];
+
+								r += rr * mvalue;
+								g += gg * mvalue;
+								b += bb * mvalue;
+								a += aa * mvalue;
+							}
+						}
+
+						// handle with matrix which x >= width and y < height part
+						if (h + i + 1 <= height && w + matrixlen > width) {
+							for (int j = 0; w + matrixlen - j > width; j++) {
+								mvalue = matrix[i * matrixlen + matrixlen - j - 1];
+								pos = ((h + i - 1) * width + w + matrixlen - j - 1) * 4;
+								rr = src [pos + 0];
+								gg = src [pos + 1];
+								bb = src [pos + 2];
+								aa = src [pos + 3];
+
+								r += rr * mvalue;
+								g += gg * mvalue;
+								b += bb * mvalue;
+								a += aa * mvalue;
+							}
+						}
+
+						// handle with matrix which x < width and y >= height part
+						if (h + i + 1 > height) {
+							for (int j = 0; j + w_offset < matrixlen && j + w < width; j++) {
+								mvalue = matrix[i * matrixlen + j + w_offset];
+								pos = ((h + i - height) * width + j + w) * 4;
+								rr = src [pos + 0];
+								gg = src [pos + 1];
+								bb = src [pos + 2];
+								aa = src [pos + 3];
+
+								r += rr * mvalue;
+								g += gg * mvalue;
+								b += bb * mvalue;
+								a += aa * mvalue;
+							}
+						}
+					}
+
+					pos = (y * width + x) * 4;
+					dst [pos + 0] += (byte)r;
+					dst [pos + 1] += (byte)g;
+					dst [pos + 2] += (byte)b;
+					dst [pos + 3] += (byte)a;
 				}
 			}
 		}
@@ -181,9 +412,14 @@ namespace Mard.Tools.Blur
 			int w_offset;
 			int h;
 			int h_offset;
+			float mvalue;
+			int pos;
 
 			int matrixlen = radius + radius + 1;
 			int j = column;
+
+			if (column >= matrixlen || column < 0)
+				return;
 
 			for (int y = 0; y < height; y++) {
 				for (int x = 0; x < width; x++) {
@@ -205,22 +441,137 @@ namespace Mard.Tools.Blur
 					r = g = b = a = 0;
 					if (j + w_offset < matrixlen && j + w < width) {
 						for (int i = 0; i + h_offset < matrixlen && i + h < height; i++) {
+							mvalue = matrix[(i + h_offset) * matrixlen + j + w_offset];
+							pos = ((i + h) * width + j + w) * 4;
+							rr = src [pos + 0];
+							gg = src [pos + 1];
+							bb = src [pos + 2];
+							aa = src [pos + 3];
 
-							rr = src [((i + h) * width + j + w) * 4 + 0];
-							gg = src [((i + h) * width + j + w) * 4 + 1];
-							bb = src [((i + h) * width + j + w) * 4 + 2];
-							aa = src [((i + h) * width + j + w) * 4 + 3];
-
-							r += rr * matrix[(i + h_offset) * matrixlen + j + w_offset];
-							g += gg * matrix[(i + h_offset) * matrixlen + j + w_offset];
-							b += bb * matrix[(i + h_offset) * matrixlen + j + w_offset];
-							a += aa * matrix[(i + h_offset) * matrixlen + j + w_offset];
+							r += rr * mvalue;
+							g += gg * mvalue;
+							b += bb * mvalue;
+							a += aa * mvalue;
 						}
-						dst [(y * width + x) * 4 + 0] += (byte)r;
-						dst [(y * width + x) * 4 + 1] += (byte)g;
-						dst [(y * width + x) * 4 + 2] += (byte)b;
-						dst [(y * width + x) * 4 + 3] += (byte)a;
+
 					}
+
+					if (h_offset > 0 || w_offset >= j) {
+						// handle with matrix which x < 0 and y < 0 part
+						if (w_offset > j) {
+							for (int i = h_offset - 1; i >= 0; i--) {
+								mvalue = matrix[i * matrixlen + j];
+								pos = ((height + i - h_offset - 1) * width + width + j - w_offset) * 4;
+
+								rr = src [pos + 0];
+								gg = src [pos + 1];
+								bb = src [pos + 2];
+								aa = src [pos + 3];
+
+								r += rr * mvalue;
+								g += gg * mvalue;
+								b += bb * mvalue;
+								a += aa * mvalue;
+							}
+						}
+						// handle with matrix which x < 0 and y >= 0 part
+						if (w_offset > j) {
+							for (int i = 0; i + h_offset < matrixlen && i + h < height; i++) {
+								mvalue = matrix[(i + h_offset) * matrixlen + j];
+								pos = ((i + h) * width + width + j - w_offset) * 4;
+
+								rr = src [pos + 0];
+								gg = src [pos + 1];
+								bb = src [pos + 2];
+								aa = src [pos + 3];
+
+								r += rr * mvalue;
+								g += gg * mvalue;
+								b += bb * mvalue;
+								a += aa * mvalue;
+							}
+						}
+
+						// handle with matrix which x >= 0 and y < 0 part
+						if (w_offset <= j && h_offset > 0) {
+							for (int i = h_offset - 1; i >= 0; i--) {
+								mvalue = matrix[i * matrixlen + j];
+								pos = ((height + i - h_offset - 1) * width + j + w - w_offset) * 4;
+
+								rr = src [pos + 0];
+								gg = src [pos + 1];
+								bb = src [pos + 2];
+								aa = src [pos + 3];
+
+								r += rr * mvalue;
+								g += gg * mvalue;
+								b += bb * mvalue;
+								a += aa * mvalue;
+							}
+						}
+					}
+						
+					if (h + matrixlen > height || w + j + 1 > width) {
+						// handle with matrix which x >= width and y >= height part
+						if (w + j + 1 > width) {
+							for (int i = 0; h + matrixlen - i > height; i++) {
+								mvalue = matrix[(matrixlen - i - 1) * matrixlen + j];
+								pos = ((h + matrixlen - i - height - 1) * width + w + j - width) * 4;
+								rr = src [pos + 0];
+								gg = src [pos + 1];
+								bb = src [pos + 2];
+								aa = src [pos + 3];
+
+								r += rr * mvalue;
+								g += gg * mvalue;
+								b += bb * mvalue;
+								a += aa * mvalue;
+							}
+						}
+
+						// handle with matrix which x >= width and y < height part
+						if (w + j + 1 > width) {
+							for (int i = 0; i + h_offset < matrixlen && i + h < height; i++) {
+								mvalue = matrix[(i + h_offset) * matrixlen + j];
+								pos = ((i + h) * width + w + j - width) * 4;
+
+								rr = src [pos + 0];
+								gg = src [pos + 1];
+								bb = src [pos + 2];
+								aa = src [pos + 3];
+
+								r += rr * mvalue;
+								g += gg * mvalue;
+								b += bb * mvalue;
+								a += aa * mvalue;
+							}
+						}
+
+						// handle with matrix which x < width and y >= height part
+						if (w + j + 1 <= width && h + matrixlen > height) {
+							for (int i = 0; h + matrixlen - i > height; i++) {
+								mvalue = matrix[(matrixlen - i - 1) * matrixlen + j];
+								pos = ((h + matrixlen - i - height - 1) * width + j + w) * 4;
+
+								rr = src [pos + 0];
+								gg = src [pos + 1];
+								bb = src [pos + 2];
+								aa = src [pos + 3];
+
+								r += rr * mvalue;
+								g += gg * mvalue;
+								b += bb * mvalue;
+								a += aa * mvalue;
+							}
+						}
+					}
+
+
+					pos = (y * width + x) * 4;
+					dst [pos + 0] += (byte)r;
+					dst [pos + 1] += (byte)g;
+					dst [pos + 2] += (byte)b;
+					dst [pos + 3] += (byte)a;
 				}
 			}
 		}
@@ -249,6 +600,8 @@ namespace Mard.Tools.Blur
 			int w_offset;
 			int h;
 			int h_offset;
+			float mvalue;
+			int pos;
 
 			int matrixlen = radius + radius + 1;
 
@@ -272,18 +625,118 @@ namespace Mard.Tools.Blur
 					r = g = b = 0;
 					for (int i = 0; i + h_offset < matrixlen && i + h < height; i++) {
 						for (int j = 0; j + w_offset < matrixlen && j + w < width; j++) {
-							rr = src [((i + h) * width + j + w) * 3 + 0];
-							gg = src [((i + h) * width + j + w) * 3 + 1];
-							bb = src [((i + h) * width + j + w) * 3 + 2];
+							mvalue = matrix[(i + h_offset) * matrixlen + j + w_offset];
+							pos = ((i + h) * width + j + w) * 3;
+							rr = src [pos + 0];
+							gg = src [pos + 1];
+							bb = src [pos + 2];
 
-							r += rr * matrix[(i + h_offset) * matrixlen + j + w_offset];
-							g += gg * matrix[(i + h_offset) * matrixlen + j + w_offset];
-							b += bb * matrix[(i + h_offset) * matrixlen + j + w_offset];
+							r += rr * mvalue;
+							g += gg * mvalue;
+							b += bb * mvalue;
 						}
 					}
-					dst [(y * width + x) * 3 + 0] = (byte)r;
-					dst [(y * width + x) * 3 + 1] = (byte)g;
-					dst [(y * width + x) * 3 + 2] = (byte)b;
+
+					if (h_offset > 0 || w_offset > 0) {
+						// handle with matrix which x < 0 and y < 0 part
+						for (int i = h_offset - 1; i >= 0; i--) {
+							for (int j = w_offset - 1; j >= 0; j--) {
+								mvalue = matrix[i * matrixlen + j];
+								pos = ((height + i - h_offset - 1) * width + width + j -  w_offset - 1) * 3;
+
+								rr = src [pos + 0];
+								gg = src [pos + 1];
+								bb = src [pos + 2];
+
+								r += rr * mvalue;
+								g += gg * mvalue;
+								b += bb * mvalue;
+							}
+						}
+						// handle with matrix which x < 0 and y >= 0 part
+						for (int i = 0; i + h_offset < matrixlen && i + h < height; i++) {
+							for (int j = w_offset - 1; j >= 0; j--) {
+								mvalue = matrix[(i + h_offset) * matrixlen + j];
+								pos = ((i + h) * width + width + j -  w_offset - 1) * 3;
+
+								rr = src [pos + 0];
+								gg = src [pos + 1];
+								bb = src [pos + 2];
+
+								r += rr * mvalue;
+								g += gg * mvalue;
+								b += bb * mvalue;
+							}
+						}
+
+						// handle with matrix which x >= 0 and y < 0 part
+						for (int i = h_offset - 1; i >= 0; i--) {
+							for (int j = 0; j + w_offset < matrixlen && j + w < width; j++) {
+								mvalue = matrix[i * matrixlen + j + w_offset];
+								pos = ((height + i - h_offset - 1) * width + j + w) * 3;
+
+								rr = src [pos + 0];
+								gg = src [pos + 1];
+								bb = src [pos + 2];
+
+								r += rr * mvalue;
+								g += gg * mvalue;
+								b += bb * mvalue;
+							}
+						}
+					}
+
+					if (h + matrixlen > height || w + matrixlen > width) {
+						// handle with matrix which x >= width and y >= height part
+						for (int i = 0; h + matrixlen - i > height; i++) {
+							for (int j = 0; w + matrixlen - j > width; j++) {
+								mvalue = matrix[(matrixlen - i - 1) * matrixlen + matrixlen - j - 1];
+								pos = ((h + matrixlen - i - height - 1) * width + w + matrixlen - j - 1) * 3;
+								rr = src [pos + 0];
+								gg = src [pos + 1];
+								bb = src [pos + 2];
+
+								r += rr * mvalue;
+								g += gg * mvalue;
+								b += bb * mvalue;
+							}
+						}
+
+						// handle with matrix which x >= width and y < height part
+						for (int i = 0; i + h_offset < matrixlen && i + h < height; i++) {
+							for (int j = 0; w + matrixlen - j > width; j++) {
+								mvalue = matrix[(i + h_offset) * matrixlen + matrixlen - j - 1];
+								pos = ((i + h - 1) * width + w + matrixlen - j - 1) * 3;
+								rr = src [pos + 0];
+								gg = src [pos + 1];
+								bb = src [pos + 2];
+
+								r += rr * mvalue;
+								g += gg * mvalue;
+								b += bb * mvalue;
+							}
+						}
+
+						// handle with matrix which x < width and y >= height part
+						for (int i = 0; h + matrixlen - i > height; i++) {
+							for (int j = 0; j + w_offset < matrixlen && j + w < width; j++) {
+								mvalue = matrix[(matrixlen - i - 1) * matrixlen + j + w_offset];
+								pos = ((h + matrixlen - i - height - 1) * width + j + w) * 3;
+								rr = src [pos + 0];
+								gg = src [pos + 1];
+								bb = src [pos + 2];
+
+								r += rr * mvalue;
+								g += gg * mvalue;
+								b += bb * mvalue;
+							}
+						}
+					}
+
+					pos = (y * width + x) * 3;
+					dst [pos + 0] = (byte)r;
+					dst [pos + 1] = (byte)g;
+					dst [pos + 2] = (byte)b;
 				}
 			}
 		}
@@ -309,6 +762,8 @@ namespace Mard.Tools.Blur
 			int w_offset;
 			int h;
 			int h_offset;
+			float mvalue;
+			int pos;
 
 			int matrixlen = radius + radius + 1;
 			int i = row;
@@ -333,18 +788,118 @@ namespace Mard.Tools.Blur
 					r = g = b = 0;
 					if (i + h_offset < matrixlen && i + h < height) {
 						for (int j = 0; j + w_offset < matrixlen && j + w < width; j++) {
-							rr = src [((i + h) * width + j + w) * 3 + 0];
-							gg = src [((i + h) * width + j + w) * 3 + 1];
-							bb = src [((i + h) * width + j + w) * 3 + 2];
+							mvalue = matrix[(i + h_offset) * matrixlen + j + w_offset];
+							pos = ((i + h) * width + j + w) * 3;
+							rr = src [pos + 0];
+							gg = src [pos + 1];
+							bb = src [pos + 2];
 
-							r += rr * matrix[(i + h_offset) * matrixlen + j + w_offset];
-							g += gg * matrix[(i + h_offset) * matrixlen + j + w_offset];
-							b += bb * matrix[(i + h_offset) * matrixlen + j + w_offset];
+							r += rr * mvalue;
+							g += gg * mvalue;
+							b += bb * mvalue;
 						}
-						dst [(y * width + x) * 3 + 0] += (byte)r;
-						dst [(y * width + x) * 3 + 1] += (byte)g;
-						dst [(y * width + x) * 3 + 2] += (byte)b;
 					}
+						
+					if (h_offset >= i || w_offset > 0) {
+						// handle with matrix which x < 0 and y < 0 part
+						if (h_offset > i) {
+							for (int j = w_offset - 1; j >= 0; j--) {
+								mvalue = matrix[i * matrixlen + j];
+								pos = ((height + i - h_offset) * width + width + j -  w_offset - 1) * 3;
+
+								rr = src [pos + 0];
+								gg = src [pos + 1];
+								bb = src [pos + 2];
+
+								r += rr * mvalue;
+								g += gg * mvalue;
+								b += bb * mvalue;
+							}
+						}
+						// handle with matrix which x < 0 and y >= 0 part
+						if (h_offset <= i && i + h < height && w_offset > 0) {
+							for (int j = w_offset - 1; j >= 0; j--) {
+								mvalue = matrix[i * matrixlen + j];
+								pos = ((i + h - h_offset) * width + width + j -  w_offset - 1) * 3;
+
+								rr = src [pos + 0];
+								gg = src [pos + 1];
+								bb = src [pos + 2];
+
+								r += rr * mvalue;
+								g += gg * mvalue;
+								b += bb * mvalue;
+							}
+						}
+
+						// handle with matrix which x >= 0 and y < 0 part
+						if  (h_offset > i) {
+							for (int j = 0; j + w_offset < matrixlen && j + w < width; j++) {
+								mvalue = matrix[i * matrixlen + j + w_offset];
+								pos = ((height + i - h_offset) * width + j + w) * 3;
+
+								rr = src [pos + 0];
+								gg = src [pos + 1];
+								bb = src [pos + 2];
+
+								r += rr * mvalue;
+								g += gg * mvalue;
+								b += bb * mvalue;
+							}
+						}
+					}
+
+					if (h + i + 1 > height || w + matrixlen > width) {
+						// handle with matrix which x >= width and y >= height part
+						if (h + i + 1 > height) {
+							for (int j = 0; w + matrixlen - j > width; j++) {
+								mvalue = matrix[i * matrixlen + matrixlen - j - 1];
+								pos = ((h + i - height) * width + w + matrixlen - j - 1) * 3;
+								rr = src [pos + 0];
+								gg = src [pos + 1];
+								bb = src [pos + 2];
+
+								r += rr * mvalue;
+								g += gg * mvalue;
+								b += bb * mvalue;
+							}
+						}
+
+						// handle with matrix which x >= width and y < height part
+						if (h + i + 1 <= height && w + matrixlen > width) {
+							for (int j = 0; w + matrixlen - j > width; j++) {
+								mvalue = matrix[i * matrixlen + matrixlen - j - 1];
+								pos = ((h + i - 1) * width + w + matrixlen - j - 1) * 3;
+								rr = src [pos + 0];
+								gg = src [pos + 1];
+								bb = src [pos + 2];
+
+								r += rr * mvalue;
+								g += gg * mvalue;
+								b += bb * mvalue;
+							}
+						}
+
+						// handle with matrix which x < width and y >= height part
+						if (h + i + 1 > height) {
+							for (int j = 0; j + w_offset < matrixlen && j + w < width; j++) {
+								mvalue = matrix[i * matrixlen + j + w_offset];
+								pos = ((h + i - height) * width + j + w) * 3;
+								rr = src [pos + 0];
+								gg = src [pos + 1];
+								bb = src [pos + 2];
+
+								r += rr * mvalue;
+								g += gg * mvalue;
+								b += bb * mvalue;
+							}
+						}
+					}
+
+					pos = (y * width + x) * 3;
+					dst [pos + 0] += (byte)r;
+					dst [pos + 1] += (byte)g;
+					dst [pos + 2] += (byte)b;
 				}
 			}
 		}
@@ -370,6 +925,8 @@ namespace Mard.Tools.Blur
 			int w_offset;
 			int h;
 			int h_offset;
+			float mvalue;
+			int pos;
 
 			int matrixlen = radius + radius + 1;
 			int j = column;
@@ -394,19 +951,120 @@ namespace Mard.Tools.Blur
 					r = g = b = 0;
 					if (j + w_offset < matrixlen && j + w < width) {
 						for (int i = 0; i + h_offset < matrixlen && i + h < height; i++) {
+							mvalue = matrix[(i + h_offset) * matrixlen + j + w_offset];
+							pos = ((i + h) * width + j + w) * 3;
+							rr = src [pos + 0];
+							gg = src [pos + 1];
+							bb = src [pos + 2];
 
-							rr = src [((i + h) * width + j + w) * 3 + 0];
-							gg = src [((i + h) * width + j + w) * 3 + 1];
-							bb = src [((i + h) * width + j + w) * 3 + 2];
-
-							r += rr * matrix[(i + h_offset) * matrixlen + j + w_offset];
-							g += gg * matrix[(i + h_offset) * matrixlen + j + w_offset];
-							b += bb * matrix[(i + h_offset) * matrixlen + j + w_offset];
+							r += rr * mvalue;
+							g += gg * mvalue;
+							b += bb * mvalue;
 						}
-						dst [(y * width + x) * 3 + 0] += (byte)r;
-						dst [(y * width + x) * 3 + 1] += (byte)g;
-						dst [(y * width + x) * 3 + 2] += (byte)b;
 					}
+
+					if (h_offset > 0 || w_offset >= j) {
+						// handle with matrix which x < 0 and y < 0 part
+						if (w_offset > j) {
+							for (int i = h_offset - 1; i >= 0; i--) {
+								mvalue = matrix[i * matrixlen + j];
+								pos = ((height + i - h_offset - 1) * width + width + j - w_offset) * 3;
+
+								rr = src [pos + 0];
+								gg = src [pos + 1];
+								bb = src [pos + 2];
+
+								r += rr * mvalue;
+								g += gg * mvalue;
+								b += bb * mvalue;
+							}
+						}
+						// handle with matrix which x < 0 and y >= 0 part
+						if (w_offset > j) {
+							for (int i = 0; i + h_offset < matrixlen && i + h < height; i++) {
+								mvalue = matrix[(i + h_offset) * matrixlen + j];
+								pos = ((i + h) * width + width + j - w_offset) * 3;
+
+								rr = src [pos + 0];
+								gg = src [pos + 1];
+								bb = src [pos + 2];
+
+								r += rr * mvalue;
+								g += gg * mvalue;
+								b += bb * mvalue;
+							}
+						}
+
+						// handle with matrix which x >= 0 and y < 0 part
+						if (w_offset <= j && h_offset > 0) {
+							for (int i = h_offset - 1; i >= 0; i--) {
+								mvalue = matrix[i * matrixlen + j];
+								pos = ((height + i - h_offset - 1) * width + j + w - w_offset) * 3;
+
+								rr = src [pos + 0];
+								gg = src [pos + 1];
+								bb = src [pos + 2];
+
+								r += rr * mvalue;
+								g += gg * mvalue;
+								b += bb * mvalue;
+							}
+						}
+					}
+
+					if (h + matrixlen > height || w + j + 1 > width) {
+						// handle with matrix which x >= width and y >= height part
+						if (w + j + 1 > width) {
+							for (int i = 0; h + matrixlen - i > height; i++) {
+								mvalue = matrix[(matrixlen - i - 1) * matrixlen + j];
+								pos = ((h + matrixlen - i - height - 1) * width + w + j - width) * 3;
+								rr = src [pos + 0];
+								gg = src [pos + 1];
+								bb = src [pos + 2];
+
+								r += rr * mvalue;
+								g += gg * mvalue;
+								b += bb * mvalue;
+							}
+						}
+
+						// handle with matrix which x >= width and y < height part
+						if (w + j + 1 > width) {
+							for (int i = 0; i + h_offset < matrixlen && i + h < height; i++) {
+								mvalue = matrix[(i + h_offset) * matrixlen + j];
+								pos = ((i + h) * width + w + j - width) * 3;
+
+								rr = src [pos + 0];
+								gg = src [pos + 1];
+								bb = src [pos + 2];
+
+								r += rr * mvalue;
+								g += gg * mvalue;
+								b += bb * mvalue;
+							}
+						}
+
+						// handle with matrix which x < width and y >= height part
+						if (w + j + 1 <= width && h + matrixlen > height) {
+							for (int i = 0; h + matrixlen - i > height; i++) {
+								mvalue = matrix[(matrixlen - i - 1) * matrixlen + j];
+								pos = ((h + matrixlen - i - height - 1) * width + j + w) * 3;
+
+								rr = src [pos + 0];
+								gg = src [pos + 1];
+								bb = src [pos + 2];
+
+								r += rr * mvalue;
+								g += gg * mvalue;
+								b += bb * mvalue;
+							}
+						}
+					}
+
+					pos = (y * width + x) * 3;
+					dst [pos + 0] += (byte)r;
+					dst [pos + 1] += (byte)g;
+					dst [pos + 2] += (byte)b;
 				}
 			}
 		}
