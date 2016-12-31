@@ -26,7 +26,7 @@ public class unity_GM_testvector : MonoBehaviour {
 	public static void TestVector()
 	{
 		int r = 3;
-		float sd = 2.0f;
+		float sd = 10.5f;
 		float[] result = GaussianMatrixGen.GetGaussianMatrixIn2d (sd, r);
 		float precision = 0.0f;
 
@@ -42,7 +42,7 @@ public class unity_GM_testvector : MonoBehaviour {
 
 		print ("precision: " + precision);
 
-		result = GaussianMatrixGen.GetGaussianMatrixInLinear (sd, r);
+		result = GaussianMatrixGen.GetGaussianMatrixIn1d (sd, r);
 		sb = new StringBuilder ();
 		for (int j = 0; j <= r + r; j++) {
 			sb.AppendFormat ("{0}\t", result [j]);

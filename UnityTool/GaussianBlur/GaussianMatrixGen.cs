@@ -87,12 +87,12 @@ namespace Mard.Tools.Blur
 		}
 
 		/// <summary>
-		/// GetGaussianMatrixIn: Gets the gaussian matrix[1xn] by given standard deviation(σ) and radius(r), (n = 2 * r + 1)
+		/// GetGaussianMatrixIn1d: Gets the gaussian matrix[1xn] by given standard deviation(σ) and radius(r), (n = 2 * r + 1)
 		/// </summary>
 		/// <returns>gaussian matrix[1xn] in array</returns>
 		/// <param name="sd">standard deviation(σ)</param>
 		/// <param name="r">radius</param>
-		public static float[] GetGaussianMatrixInLinear(float sd, int r)
+		public static float[] GetGaussianMatrixIn1d(float sd, int r)
 		{
 			float[] result = new float[(r + r + 1)];
 

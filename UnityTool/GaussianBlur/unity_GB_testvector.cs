@@ -13,9 +13,10 @@ using Mard.Tools.Blur;
 [ExecuteInEditMode]
 public class unity_GB_testvector : MonoBehaviour {
 
-	public RawImage targetcomponent;
-	public Texture2D tex32;
-	public Texture2D tex24;
+	public Image img32;
+	public Image img24;
+	public Sprite sp32;
+	public Sprite sp24;
 
 	// Use this for initialization
 	void Start () {
@@ -28,14 +29,14 @@ public class unity_GB_testvector : MonoBehaviour {
 	}
 
 	void OnEnable() {
-		if (null == targetcomponent || (null == tex32 && null == tex24)) {
+		if ((null == img32 && null == img24) || (null == sp32 && null == sp24)) {
 			print ("<color=red> not available image or component");
 			return;
 		}
 
-		if (null != tex32)
+		if (null != sp32)
 			Test32 ();
-		if (null != tex24)
+		if (null != sp24)
 			Test24 ();
 
 		AssetDatabase.Refresh ();
@@ -43,6 +44,7 @@ public class unity_GB_testvector : MonoBehaviour {
 
 	public void Test24 ()
 	{
+		Texture2D tex24 = sp24.texture;
 		byte[] data = tex24.GetRawTextureData ();
 		print (data.Length);
 		print ("width: " + tex24.width);
@@ -92,6 +94,7 @@ public class unity_GB_testvector : MonoBehaviour {
 
 	public void Test32()
 	{
+		Texture2D tex32 = sp32.texture;
 		byte[] data = tex32.GetRawTextureData ();
 		print (data.Length);
 		print ("width: " + tex32.width);
@@ -113,7 +116,7 @@ public class unity_GB_testvector : MonoBehaviour {
 		ts = DateTime.Now - dt;
 		print ("blur32_4: " + ts);
 		dt = DateTime.Now;
-		GaussianBlur.Blur32 (data, tex32.width, tex32.height, 0.84089642f, 1, result_32);
+		GaussianBlur.Blur32 (data, tex32.width, tex32.height, 100.5f, 3, result_32);
 		ts = DateTime.Now - dt;
 		print ("blur32: " + ts);
 		dt = DateTime.Now;
@@ -130,19 +133,25 @@ public class unity_GB_testvector : MonoBehaviour {
 		dt = DateTime.Now;
 		result_32_src = data;
 		result_32_dst = result_32_repeat;
-		float sd = 0.5f;
+		float sd = 5.5f;
 		int r = 3;
 		float[] matrix = GaussianMatrixGen.GetGaussianMatrixIn2d (sd, r);
 		for (int i = 0; i < r + r + 1; i++) {
 			GaussianBlur.Blur32Horizontal (result_32_src, tex32.width, tex32.height, matrix, sd, r, i, result_32_dst);
 		}
+		result_32_src = result_32_repeat;
+		result_32_dst = data;
+		for (int i = 0; i < r + r + 1; i++) {
+			GaussianBlur.Blur32Vertical (result_32_src, tex32.width, tex32.height, matrix, sd, r, i, result_32_dst);
+		}
+		result_32_src = data;
+		result_32_dst = result_32_repeat;
+		GaussianBlur.Blur32 (result_32_src, tex32.width, tex32.height, 100.5f, 3, result_32_dst);
 		ts = DateTime.Now - dt;
-		print ("blur32-repeat: " + ts);
+		print ("blur32-hv: " + ts);
 		dt = DateTime.Now;
 		sd = 0.84089642f;
 		r = 3;
-		matrix = GaussianMatrixGen.GetGaussianMatrixInLinear (sd, r);
-		GaussianBlur.Blur32Horizontal (result_32_src, tex32.width, tex32.height, matrix, sd, r, 1, result_32_dst);
 		ts = DateTime.Now - dt;
 		print ("blur32-repeat: " + ts);
 
@@ -164,6 +173,6 @@ public class unity_GB_testvector : MonoBehaviour {
 
 		Texture2D t32repeat = new Texture2D(tex32.width, tex32.height, TextureFormat.RGBA32, false, true);
 		t32repeat.LoadRawTextureData (result_32_dst);
-		File.WriteAllBytes(Path.Combine(Application.dataPath, "test_gaussianblur32repeat.png"), t32repeat.EncodeToPNG());
+		File.WriteAllBytes(Path.Combine(Application.dataPath, "test_gaussianblur32hv.png"), t32repeat.EncodeToPNG());
 	}
 }
