@@ -119,10 +119,10 @@ EXPORT int GaussianBlur32Horizontal(byte src[], int width, int height, float mat
 		}
 
 		pos = (y * width + x) * channel_count;
-		ATOMIC_BYTE_FETCH_AND_ADD(dst[pos + 0], (byte)r);
-		ATOMIC_BYTE_FETCH_AND_ADD(dst[pos + 1], (byte)g);
-		ATOMIC_BYTE_FETCH_AND_ADD(dst[pos + 2], (byte)b);
-		ATOMIC_BYTE_FETCH_AND_ADD(dst[pos + 3], (byte)a);
+		dst[pos + 0] = (byte)r;
+		dst[pos + 1] = (byte)g;
+		dst[pos + 2] = (byte)b;
+		dst[pos + 3] = (byte)a;
 	}
 
 	return 0;
@@ -171,10 +171,10 @@ EXPORT int GaussianBlur32HorizontalRange(byte src[], int width, int height, floa
 			}
 
 			pos = (y * width + x) * channel_count;
-			ATOMIC_BYTE_FETCH_AND_ADD(dst[pos + 0], (byte)r);
-			ATOMIC_BYTE_FETCH_AND_ADD(dst[pos + 1], (byte)g);
-			ATOMIC_BYTE_FETCH_AND_ADD(dst[pos + 2], (byte)b);
-			ATOMIC_BYTE_FETCH_AND_ADD(dst[pos + 3], (byte)a);
+			dst[pos + 0] = (byte)r;
+			dst[pos + 1] = (byte)g;
+			dst[pos + 2] = (byte)b;
+			dst[pos + 3] = (byte)a;
 		}
 	}
 
@@ -224,10 +224,10 @@ EXPORT int GaussianBlur32Vertical(byte src[], int width, int height, float matri
 		}
 
 		pos = (y * width + x) * channel_count;
-		ATOMIC_BYTE_FETCH_AND_ADD(dst[pos + 0], (byte)r);
-		ATOMIC_BYTE_FETCH_AND_ADD(dst[pos + 1], (byte)g);
-		ATOMIC_BYTE_FETCH_AND_ADD(dst[pos + 2], (byte)b);
-		ATOMIC_BYTE_FETCH_AND_ADD(dst[pos + 3], (byte)a);
+		dst[pos + 0] = (byte)r;
+		dst[pos + 1] = (byte)g;
+		dst[pos + 2] = (byte)b;
+		dst[pos + 3] = (byte)a;
 	}
 
 	return 0;
@@ -276,10 +276,10 @@ EXPORT int GaussianBlur32VerticalRange(byte src[], int width, int height, float 
 			}
 
 			pos = (y * width + x) * channel_count;
-			ATOMIC_BYTE_FETCH_AND_ADD(dst[pos + 0], (byte)r);
-			ATOMIC_BYTE_FETCH_AND_ADD(dst[pos + 1], (byte)g);
-			ATOMIC_BYTE_FETCH_AND_ADD(dst[pos + 2], (byte)b);
-			ATOMIC_BYTE_FETCH_AND_ADD(dst[pos + 3], (byte)a);
+			dst[pos + 0] = (byte)r;
+			dst[pos + 1] = (byte)g;
+			dst[pos + 2] = (byte)b;
+			dst[pos + 3] = (byte)a;
 		}
 	}
 
@@ -375,9 +375,9 @@ EXPORT int GaussianBlur24Horizontal(byte src[], int width, int height, float mat
 		}
 
 		pos = (y * width + x) * channel_count;
-		ATOMIC_BYTE_FETCH_AND_ADD(dst[pos + 0], (byte)r);
-		ATOMIC_BYTE_FETCH_AND_ADD(dst[pos + 1], (byte)g);
-		ATOMIC_BYTE_FETCH_AND_ADD(dst[pos + 2], (byte)b);
+		dst[pos + 0] = (byte)r;
+		dst[pos + 1] = (byte)g;
+		dst[pos + 2] = (byte)b;
 	}
 
 	return 0;
@@ -424,9 +424,9 @@ EXPORT int GaussianBlur24HorizontalRange(byte src[], int width, int height, floa
 			}
 
 			pos = (y * width + x) * channel_count;
-			ATOMIC_BYTE_FETCH_AND_ADD(dst[pos + 0], (byte)r);
-			ATOMIC_BYTE_FETCH_AND_ADD(dst[pos + 1], (byte)g);
-			ATOMIC_BYTE_FETCH_AND_ADD(dst[pos + 2], (byte)b);
+			dst[pos + 0] = (byte)r;
+			dst[pos + 1] = (byte)g;
+			dst[pos + 2] = (byte)b;
 		}
 	}
 
@@ -474,9 +474,9 @@ EXPORT int GaussianBlur24Vertical(byte src[], int width, int height, float matri
 		}
 
 		pos = (y * width + x) * channel_count;
-		ATOMIC_BYTE_FETCH_AND_ADD(dst[pos + 0], (byte)r);
-		ATOMIC_BYTE_FETCH_AND_ADD(dst[pos + 1], (byte)g);
-		ATOMIC_BYTE_FETCH_AND_ADD(dst[pos + 2], (byte)b);
+		dst[pos + 0] = (byte)r;
+		dst[pos + 1] = (byte)g;
+		dst[pos + 2] = (byte)b;
 	}
 
 	return 0;
@@ -523,9 +523,9 @@ EXPORT int GaussianBlur24VerticalRange(byte src[], int width, int height, float 
 			}
 
 			pos = (y * width + x) * channel_count;
-			ATOMIC_BYTE_FETCH_AND_ADD(dst[pos + 0], (byte)r);
-			ATOMIC_BYTE_FETCH_AND_ADD(dst[pos + 1], (byte)g);
-			ATOMIC_BYTE_FETCH_AND_ADD(dst[pos + 2], (byte)b);
+			dst[pos + 0] = (byte)r;
+			dst[pos + 1] = (byte)g;
+			dst[pos + 2] = (byte)b;
 		}
 	}
 
