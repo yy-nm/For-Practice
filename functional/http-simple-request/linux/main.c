@@ -27,11 +27,14 @@ int main(void)
 	const char *test_curl_post_args = "hrhr=4&lala=5";
 	int ret;
 
+	ret = simple_http_request_getdata("https://www.baidu.com/", recv_data);
+	printf("simple_http_request_getdata ret: %d\n", ret);
+
 	ret = simple_http_request_getdata(test_curl_get, recv_data);
 	printf("simple_http_request_getdata ret: %d\n", ret);
 
 	ret = simple_http_request_post_getdata(test_curl_post, test_curl_post_args, recv_data);
-	printf("simple_http_request_post_getdata ret: %d\n", ret);
+	printf("simple_http_request_post_getdata ret: %d\n", ret);	
 
 	return 0;
 }

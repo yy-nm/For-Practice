@@ -24,7 +24,9 @@
 #ifndef SIMPLE_HTTP_REQUEST_GET_TIMEOUT
 #define SIMPLE_HTTP_REQUEST_GET_TIMEOUT 5
 #endif // !SIMPLE_HTTP_REQUEST_GET_TIMEOUT
-
+#ifndef SIMPLE_HTTP_REQUEST_POST_TIMEOUT
+#define SIMPLE_HTTP_REQUEST_POST_TIMEOUT 5
+#endif // !SIMPLE_HTTP_REQUEST_POST_TIMEOUT
 
 
 static size_t recv_nothing(void *buffer, size_t sz)
@@ -105,7 +107,7 @@ int simple_http_request_post_getdata(const char *url, const char *args, func_sim
 		return ERR_INIT;
 
 	curl_easy_setopt(curl, CURLOPT_URL, url);
-	curl_easy_setopt(curl, CURLOPT_TIMEOUT, SIMPLE_HTTP_REQUEST_GET_TIMEOUT);
+	curl_easy_setopt(curl, CURLOPT_TIMEOUT, SIMPLE_HTTP_REQUEST_POST_TIMEOUT);
 	curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, curl_writer);
 	curl_easy_setopt(curl, CURLOPT_WRITEDATA, &func);
 	curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
