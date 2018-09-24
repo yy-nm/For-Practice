@@ -1,6 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include <unistd.h>
+//#include <unistd.h>
 
 #include "binaryTree.h"
 #include "traverseBinaryTree.h"
@@ -30,27 +30,31 @@ void printTreeInHerarchy(Node *_root) {
 	Queue q1;
 	Queue q2;
 	Queue *qIndex;
+	Queue *q2lastone;
 	
 	q1.next = NULL;
 	q2.next = NULL;
 
 	q1.next = createQueueNode(_root);
+	q2lastone = &q2;
 
 	while(NULL !=  q1.next)
 	{
 		if(NULL != q1.next->node->lchild) {
 			qIndex = createQueueNode(q1.next->node->lchild);
 			if (NULL != qIndex) {
-				qIndex->next = q2.next;
-				q2.next = qIndex;
+				qIndex->next = q2lastone->next;
+				q2lastone->next = qIndex;
+				q2lastone = q2lastone->next;
 			}
 		}
 
 		if(NULL != q1.next->node->rchild) {
 			qIndex = createQueueNode(q1.next->node->rchild);
 			if (NULL != qIndex) {
-				qIndex->next = q2.next;
-				q2.next = qIndex;
+				qIndex->next = q2lastone->next;
+				q2lastone->next = qIndex;
+				q2lastone = q2lastone->next;
 			}
 		}
 
@@ -62,6 +66,7 @@ void printTreeInHerarchy(Node *_root) {
 		if (NULL == q1.next) {
 			q1.next = q2.next;
 			q2.next = NULL;
+			q2lastone = &q2;
 			printf("\n");
 		}
 	}
@@ -69,9 +74,11 @@ void printTreeInHerarchy(Node *_root) {
 
 void printTreeInHerarchyByRecursiving(Queue *_q) {
 	Queue q;
+	Queue *qlastone = NULL;
 	Queue *qIndex = NULL;
 
 	q.next = NULL;
+	qlastone = &q;
 
 	if (NULL == _q)
 		return ;
@@ -80,15 +87,17 @@ void printTreeInHerarchyByRecursiving(Queue *_q) {
 		if (NULL != _q->node->lchild) {
 			qIndex = createQueueNode(_q->node->lchild);
 			if (NULL != qIndex) {
-				qIndex->next = q.next;
-				q.next = qIndex;
+				qIndex->next = qlastone->next;
+				qlastone->next = qIndex;
+				qlastone = qlastone->next;
 			}
 		}
 		if (NULL != _q->node->rchild) {
 			qIndex = createQueueNode(_q->node->rchild);
 			if (NULL != qIndex) {
-				qIndex->next = q.next;
-				q.next = qIndex;
+				qIndex->next = qlastone->next;
+				qlastone->next = qIndex;
+				qlastone = qlastone->next;
 			}
 		}
 		printf("%d ", _q->node->value);
@@ -121,6 +130,12 @@ int main(int argc, char **args) {
 	printPreorderTree(root);
 	printf("\n");
 	printPostorderTree(root);
+	printf("\n");
+	printPreorderTreeWithoutRecursion(root);
+	printf("\n");
+	printInorderTreeWithoutRecursion(root);
+	printf("\n");
+	printPostorderTreeWithoutRecursion(root);
 	printf("\n");
 
 	printTreeInHerarchy(root);
