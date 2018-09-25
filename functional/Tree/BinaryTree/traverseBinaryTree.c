@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <stdbool.h>
 
 #include "traverseBinaryTree.h"
 
@@ -182,13 +183,58 @@ void printInorderTreeWithoutRecursion(Node *_node)
 {
 	if (NULL == _node)
 		return;
-	printf("no-implements");
+	//printf("no-implements");
+	dequeue q;
+	dequeue_init(&q);
+	dequeue_push(&q, _node);
+	dequeue q_cutleftnode;
+	dequeue_init(&q_cutleftnode);
+
+	Node * n;
+	while (q.count > 0 || q_cutleftnode.count > 0) {
+		n = dequeue_pop(&q);
+		if (n) {
+			while (n->lchild) {
+				dequeue_push(&q_cutleftnode, n);
+				n = n->lchild;
+			}
+		} else {
+			n = dequeue_pop(&q_cutleftnode);
+		}
+		
+		printf("%d ", n->value);
+		if (n->rchild)
+			dequeue_push(&q, n->rchild);
+	}
 }
 
 void printPostorderTreeWithoutRecursion(Node *_node)
 {
 	if (NULL == _node)
 		return;
-	printf("no-implements");
+	//printf("no-implements");
+	dequeue q;
+	dequeue_init(&q);
+	dequeue_push(&q, _node);
+	dequeue q_out;
+	dequeue_init(&q_out);
+	Node * n;
+	
+	while (q.count > 0) {
+		n = dequeue_pop(&q);
+		if (n->lchild) {
+			dequeue_push(&q, n->lchild);
+		}
+		if (n->rchild) {
+			dequeue_push(&q, n->rchild);
+		}
+		
+		dequeue_push(&q_out, n);
+	}
+
+	while (q_out.count > 0) {
+		n = dequeue_pop(&q_out);
+		printf("%d ", n->value);
+	}
 }
 

@@ -122,7 +122,7 @@ void printTreeInHerarchyByRecursion(Node *_root) {
 
 
 int main(int argc, char **args) {
-	int tree[] = { 1, 2, 3, 0, 5, 6, 7, 8 };
+	int tree[] = { 1, 2, 3, 0, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14 };
 	Node *root = buildTree(tree, sizeof(tree) / sizeof(int), 0);
 
 	printInorderTree(root);
