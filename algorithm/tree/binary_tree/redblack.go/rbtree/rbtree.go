@@ -225,16 +225,19 @@ func removeFixup(t *Tree, n *Node, use_tmp bool) {
 					clearTmp(n)
 				}
 				n = n.parent
-			} else if r != nil {
-				if checkNodeBlack(r.rchild) {
-					r.lchild.black = true
-					r.black = false
-					rightRotation(t, r)
-					r = n.parent.rchild
+			} else {
+				if r != nil {
+					if checkNodeBlack(r.rchild) {
+						r.lchild.black = true
+						r.black = false
+						rightRotation(t, r)
+						r = n.parent.rchild
+					}
+					if r.rchild != nil {
+						r.rchild.black = true
+					}
+					r.black = n.parent.black
 				}
-
-				r.rchild.black = true
-				r.black = n.parent.black
 				n.parent.black = true
 				leftRotation(t, n.parent)
 
