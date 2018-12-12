@@ -49,6 +49,7 @@ namespace btree
 		void InsertNonFullNode(Node *n, int key);
 		void SplitChildNode(Node *p, int index, Node *n);
 		void DeleteNode(Node *n, int key);
+		void MergeChildNode(Node *n, int index);
 		
 	};
 }
