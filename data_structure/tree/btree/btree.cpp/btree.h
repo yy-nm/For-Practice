@@ -45,6 +45,9 @@ namespace btree
 		BTree234();
 		virtual ~BTree234();
 
+		int FindMaxKey(Node *n);
+		int FindMinKey(Node *n);
+
 		bool SearchNode(Node *n, int key);
 		void InsertNonFullNode(Node *n, int key);
 		void SplitChildNode(Node *p, int index, Node *n);

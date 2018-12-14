@@ -138,6 +138,30 @@ btree::BTree234::~BTree234()
 	FreeTree();
 }
 
+int btree::BTree234::FindMaxKey(Node * n)
+{
+	if (nullptr == n)
+		return 0;
+	if (n->isLeaf) {
+		return n->keys[n->keycount - 1];
+	}
+	else {
+		return FindMaxKey(n->childs[n->keycount]);
+	}
+}
+
+int btree::BTree234::FindMinKey(Node * n)
+{
+	if (nullptr == n)
+		return 0;
+	if (n->isLeaf) {
+		return n->keys[0];
+	}
+	else {
+		return FindMinKey(n->childs[0]);
+	}
+}
+
 bool btree::BTree234::SearchNode(Node *n, int key)
 {
 	if (n->isLeaf) {
@@ -261,19 +285,28 @@ void btree::BTree234::DeleteNode(Node * n, int key)
 		// find key in internal node
 		if (findinkey) {
 			if (n->childs[i]->keycount >= t) {
-				int nkey = n->childs[i]->keys[n->childs[i]->keycount - 1];
+				int nkey = FindMaxKey(n->childs[i]);
 				n->keys[i] = nkey;
 				DeleteNode(n->childs[i], nkey);
 			}
 			else if (n->childs[i + 1]->keycount >= t) {
-				int nkey = n->childs[i + 1]->keys[0];
+				int nkey = FindMinKey(n->childs[i + 1]);
 				n->keys[i] = nkey;
 				DeleteNode(n->childs[i + 1], nkey);
 			}
 			else {
 				// merge childs[i + 1] and key to childs[i]
 				MergeChildNode(n, i);
-				DeleteNode(n->childs[i], key);
+				// check if is keycount == 0
+				if (n->keycount == 0 && n == root) {
+					root = n->childs[i];
+					Node::GiveBack(n);
+					DeleteNode(root, key);
+				}
+				else {
+					DeleteNode(n->childs[i], key);
+				}
+				
 			}
 		}
 		else {
@@ -306,6 +339,13 @@ void btree::BTree234::DeleteNode(Node * n, int key)
 				else {
 					// merge sibling child and key to childs[i]
 					MergeChildNode(n, i);
+					// check if is keycount == 0
+					if (n->keycount == 0 && n == root) {
+						root = n->childs[i];
+						Node::GiveBack(n);
+						DeleteNode(root, key);
+						return;
+					}
 				}
 				DeleteNode(n->childs[i], key);
 			}
@@ -329,8 +369,14 @@ void btree::BTree234::DeleteNode(Node * n, int key)
 				}
 				else {
 					MergeChildNode(n, i - 1);
-					DeleteNode(n->childs[i - 1], key);
+					if (n->keycount == 0 && n == root) {
+						root = n->childs[i - 1];
+						Node::GiveBack(n);
+						DeleteNode(root, key);
+						return;
+					}
 				}
+				DeleteNode(n->childs[i - 1], key);
 			}
 		}
 	}
