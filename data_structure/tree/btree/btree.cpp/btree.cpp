@@ -52,6 +52,9 @@ void btree::BTree234::Insert(int key)
 		root->isLeaf = true;
 	}
 
+	if (Search(key))
+		return;
+
 	Node *n = root;
 
 	if (n->keycount == BTREE_234_NODE_KEY_COUNT) {
@@ -315,7 +318,7 @@ void btree::BTree234::DeleteNode(Node * n, int key)
 			if (n->childs[i]->keycount >= t) {
 				DeleteNode(n->childs[i], key);
 			}
-			else if (i <= n->keycount) { // merge bigger one 
+			else if (i < n->keycount) { // merge bigger one 
 				if (n->childs[i + 1]->keycount >= t) {
 					// move sibling child's first key and first child to childs[i]
 					Node *left = n->childs[i];
@@ -360,8 +363,8 @@ void btree::BTree234::DeleteNode(Node * n, int key)
 						right->childs[j] = right->childs[j - 1];
 					}
 					
-					right->keys[0] = n->keys[i];
-					n->keys[i] = left->keys[left->keycount - 1];
+					right->keys[0] = n->keys[i - 1];
+					n->keys[i - 1] = left->keys[left->keycount - 1];
 					right->childs[0] = left->childs[left->keycount];
 
 					left->keycount--;
