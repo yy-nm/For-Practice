@@ -43,6 +43,12 @@ int main(void)
 	removevalue = 2;
 	tree->Delete(removevalue);
 	tree->TraverseTree();
+	removevalue = 13;
+	tree->Delete(removevalue);
+	tree->TraverseTree();
+	removevalue = 1;
+	tree->Delete(removevalue);
+	tree->TraverseTree();
 
 	std::cout << std::endl;
 	std::cout << std::endl;

@@ -317,7 +317,7 @@ namespace bplustree
 
 				if (p->keycount < B) {
 					int oldpk = p->keys[0];
-					for (int i = p->keycount - 1; i > index; i++) {
+					for (int i = p->keycount - 1; i > index; i--) {
 						p->childs[i + 1] = p->childs[i];
 						p->keys[i + 1] = p->keys[i];
 					}
@@ -614,6 +614,9 @@ namespace bplustree
 			}
 			else if (p->keycount < mincount) {
 				KeepNodeKeyCountCorrect(p, oldpk, parents);
+			}
+			else if (oldpk != p->keys[0]) {
+				ModifyParentKeys(oldpk, p->keys[0], parents);
 			}
 		}
 
