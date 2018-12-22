@@ -15,7 +15,7 @@ namespace bplustree
 {
 	template<size_t B>
 	class BPlusTree {
-		static_assert(B > 2, "b+tree node count must be more than 1!");
+		static_assert(B > 2, "b+tree node count must be more than 2!");
 	protected:
 		struct Node {
 			bool isLeaf;
