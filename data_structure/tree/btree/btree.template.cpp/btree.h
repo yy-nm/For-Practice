@@ -243,8 +243,8 @@ namespace btree
 
 		void SplitChildNode(Node *p, int index, Node *n)
 		{
-			int t = (T + 1) / 2 - 1;
-			int middleindex = (T + 1) / 2;
+			int middleindex = T / 2;
+			int t = T - middleindex - 1;
 
 			Node *right = Node::GetNode();
 			right->isLeaf = n->isLeaf;

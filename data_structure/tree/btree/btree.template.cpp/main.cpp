@@ -13,7 +13,7 @@ using namespace btree;
 int main(void)
 {
 
-	BTree<4> *tree = BTree<4>::CreateEmptyTree();
+	BTree<3> *tree = BTree<3>::CreateEmptyTree();
 
 	for (int i = 1; i < 11; i++) {
 		tree->Insert(i);
