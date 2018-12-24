@@ -6,7 +6,7 @@ import (
 )
 
 func main() {
-	var tree btree.BTree234
+	var tree btree.BTree23
 
 	for i := 1; i < 11; i++ {
 		tree.AddElement(i)

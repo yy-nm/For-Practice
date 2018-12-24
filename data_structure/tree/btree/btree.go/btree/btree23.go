@@ -5,23 +5,23 @@ import (
 )
 
 const (
-	t                = 2
-	need_split_count = 3
+	treeKeyCount    = 3
+	treeMinKeyCount = (treeKeyCount + 1) / 2
 )
 
 type node struct {
 	isleaf   bool
-	keys     [2*t - 1]int
+	keys     [treeKeyCount]int
 	keycount int
-	childs   [2 * t]*node
+	childs   [treeKeyCount + 1]*node
 }
 
-type BTree234 struct {
+type BTree23 struct {
 	root *node
 }
 
-func GetEmptyBTree234() *BTree234 {
-	return &BTree234{
+func GetEmptyBTree234() *BTree23 {
+	return &BTree23{
 		root: &node{
 			isleaf:   true,
 			keycount: 0,
@@ -30,21 +30,22 @@ func GetEmptyBTree234() *BTree234 {
 }
 
 func splitChildNode(p *node, index int, n *node) {
-	middleindex := need_split_count / 2
+	middleindex := treeKeyCount / 2
+	movecount := treeKeyCount - middleindex - 1
 
 	rightnode := &node{
 		isleaf:   n.isleaf,
 		keycount: 0,
 	}
 
-	rightnode.keycount = middleindex
-	n.keycount = middleindex
+	rightnode.keycount = movecount
+	n.keycount = treeKeyCount - movecount - 1
 
-	for i := 0; i < middleindex; i++ {
-		rightnode.keys[i] = n.keys[i+t]
+	for i := 0; i < movecount; i++ {
+		rightnode.keys[i] = n.keys[i+middleindex+1]
 	}
-	for i := 0; i <= middleindex; i++ {
-		rightnode.childs[i] = n.childs[i+t]
+	for i := 0; i <= movecount; i++ {
+		rightnode.childs[i] = n.childs[i+middleindex+1]
 	}
 
 	for i := p.keycount; i > index; i-- {
@@ -84,7 +85,7 @@ func insertNode(n *node, k int) {
 		}
 		index++
 
-		if n.childs[index].keycount == need_split_count {
+		if n.childs[index].keycount == treeKeyCount {
 			splitChildNode(n, index, n.childs[index])
 			if n.keys[index] < k {
 				index++
@@ -95,7 +96,7 @@ func insertNode(n *node, k int) {
 	}
 }
 
-func (t *BTree234) AddElement(k int) {
+func (t *BTree23) AddElement(k int) {
 	if t == nil {
 		return
 	}
@@ -113,7 +114,7 @@ func (t *BTree234) AddElement(k int) {
 
 	n := t.root
 
-	if n == t.root && n.keycount == need_split_count {
+	if n == t.root && n.keycount == treeKeyCount {
 		nroot := &node{
 			isleaf:   false,
 			keycount: 0,
@@ -127,7 +128,7 @@ func (t *BTree234) AddElement(k int) {
 	}
 }
 
-func (t *BTree234) SearchElement(k int) bool {
+func (t *BTree23) SearchElement(k int) bool {
 	if t == nil {
 		return false
 	}
@@ -192,7 +193,7 @@ func mergeChildNode(n *node, index int) {
 	n.keycount--
 }
 
-func deleteNote(tree *BTree234, n *node, k int) {
+func deleteNote(tree *BTree23, n *node, k int) {
 	if n.isleaf {
 		index := n.keycount - 1
 		for index >= 0 {
@@ -222,6 +223,8 @@ func deleteNote(tree *BTree234, n *node, k int) {
 			}
 			index--
 		}
+
+		t := treeMinKeyCount
 
 		if findinkeys {
 			if n.childs[index].keycount >= t {
@@ -303,7 +306,7 @@ func deleteNote(tree *BTree234, n *node, k int) {
 	}
 }
 
-func (t *BTree234) DeleteElement(k int) {
+func (t *BTree23) DeleteElement(k int) {
 	if t == nil {
 		return
 	}
@@ -315,13 +318,13 @@ func (t *BTree234) DeleteElement(k int) {
 	deleteNote(t, t.root, k)
 }
 
-func (t *BTree234) FreeTree() {
+func (t *BTree23) FreeTree() {
 	if t != nil {
 		t.root = nil
 	}
 }
 
-func (t *BTree234) TraverseTree() {
+func (t *BTree23) TraverseTree() {
 	if t == nil || t.root == nil {
 		return
 	}
