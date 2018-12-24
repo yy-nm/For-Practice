@@ -10,26 +10,26 @@
 using namespace btree;
 
 
-btree::BTree234::Node::~Node()
+btree::BTree23::Node::~Node()
 {
 	for (int i = 0; keycount > 0 && i < keycount + 1; i++)
 		GiveBack(childs[i]);
 }
 
-void btree::BTree234::Node::GiveBack(Node * n)
+void btree::BTree23::Node::GiveBack(Node * n)
 {
 	if (nullptr != n)
 		delete n;
 }
 
-BTree234::Node * btree::BTree234::Node::GetNode()
+BTree23::Node * btree::BTree23::Node::GetNode()
 {
 	return new Node();
 }
 
-BTree234 * btree::BTree234::CreateEmptyTree()
+BTree23 * btree::BTree23::CreateEmptyTree()
 {
-	BTree234 *t = new BTree234();
+	BTree23 *t = new BTree23();
 
 	t->root = Node::GetNode();
 	t->root->isLeaf = true;
@@ -37,7 +37,7 @@ BTree234 * btree::BTree234::CreateEmptyTree()
 	return t;
 }
 
-bool btree::BTree234::Search(int key)
+bool btree::BTree23::Search(int key)
 {
 	if (nullptr == root)
 		return false;
@@ -45,7 +45,7 @@ bool btree::BTree234::Search(int key)
 	return SearchNode(root, key);
 }
 
-void btree::BTree234::Insert(int key)
+void btree::BTree23::Insert(int key)
 {
 	if (nullptr == root) {
 		root = Node::GetNode();
@@ -57,7 +57,7 @@ void btree::BTree234::Insert(int key)
 
 	Node *n = root;
 
-	if (n->keycount == BTREE_234_NODE_KEY_COUNT) {
+	if (n->keycount == BTREE_23_NODE_KEY_COUNT) {
 		Node *nroot = Node::GetNode();
 		root = nroot;
 		nroot->isLeaf = false;
@@ -71,7 +71,7 @@ void btree::BTree234::Insert(int key)
 	}
 }
 
-void btree::BTree234::Delete(int key)
+void btree::BTree23::Delete(int key)
 {
 	if (nullptr == root) {
 		return;
@@ -85,7 +85,7 @@ void btree::BTree234::Delete(int key)
 	DeleteNode(n, key);
 }
 
-void btree::BTree234::FreeTree()
+void btree::BTree23::FreeTree()
 {
 	if (nullptr != root) {
 		Node::GiveBack(root);
@@ -93,7 +93,7 @@ void btree::BTree234::FreeTree()
 	}
 }
 
-void btree::BTree234::TraverseTree()
+void btree::BTree23::TraverseTree()
 {
 	if (nullptr == root)
 		return;
@@ -132,16 +132,16 @@ void btree::BTree234::TraverseTree()
 
 }
 
-btree::BTree234::BTree234() : root(nullptr)
+btree::BTree23::BTree23() : root(nullptr)
 {
 }
 
-btree::BTree234::~BTree234()
+btree::BTree23::~BTree23()
 {
 	FreeTree();
 }
 
-int btree::BTree234::FindMaxKey(Node * n)
+int btree::BTree23::FindMaxKey(Node * n)
 {
 	if (nullptr == n)
 		return 0;
@@ -153,7 +153,7 @@ int btree::BTree234::FindMaxKey(Node * n)
 	}
 }
 
-int btree::BTree234::FindMinKey(Node * n)
+int btree::BTree23::FindMinKey(Node * n)
 {
 	if (nullptr == n)
 		return 0;
@@ -165,7 +165,7 @@ int btree::BTree234::FindMinKey(Node * n)
 	}
 }
 
-bool btree::BTree234::SearchNode(Node *n, int key)
+bool btree::BTree23::SearchNode(Node *n, int key)
 {
 	if (n->isLeaf) {
 		for (int i = 0; i < n->keycount; i++) {
@@ -188,7 +188,7 @@ bool btree::BTree234::SearchNode(Node *n, int key)
 	}
 }
 
-void btree::BTree234::InsertNonFullNode(Node * n, int key)
+void btree::BTree23::InsertNonFullNode(Node * n, int key)
 {
 	if (n->isLeaf) {
 		int i = n->keycount - 1;
@@ -213,7 +213,7 @@ void btree::BTree234::InsertNonFullNode(Node * n, int key)
 			i--;
 		}
 		i = i + 1;
-		if (n->childs[i]->keycount == BTREE_234_NODE_KEY_COUNT) {
+		if (n->childs[i]->keycount == BTREE_23_NODE_KEY_COUNT) {
 			SplitChildNode(n, i, n->childs[i]);
 
 			if (n->keys[i] < key)
@@ -224,20 +224,21 @@ void btree::BTree234::InsertNonFullNode(Node * n, int key)
 	}
 }
 
-void btree::BTree234::SplitChildNode(Node * p, int index, Node *n)
+void btree::BTree23::SplitChildNode(Node * p, int index, Node *n)
 {
-	int t = BTREE_234_NODE_KEY_COUNT_HALF_CEIL - 1;
+	int middleindex = BTREE_23_NODE_KEY_COUNT / 2;
+	int t = BTREE_23_NODE_KEY_COUNT - middleindex - 1;
 
 	Node *right = Node::GetNode();
 	right->isLeaf = n->isLeaf;
 	right->keycount = t;
-	n->keycount = t;
+	n->keycount = BTREE_23_NODE_KEY_COUNT - t - 1;
 	for (int i = 0; i < t; i++) {
-		right->keys[i] = n->keys[i + t + 1];
+		right->keys[i] = n->keys[i + middleindex + 1];
 	}
 	if (!n->isLeaf) {
 		for (int i = 0; i <= t; i++) {
-			right->childs[i] = n->childs[i + t + 1];
+			right->childs[i] = n->childs[i + middleindex + 1];
 		}
 	}
 
@@ -246,12 +247,12 @@ void btree::BTree234::SplitChildNode(Node * p, int index, Node *n)
 	p->childs[index + 1] = right;
 	for (int i = p->keycount - 1; i >= index; i--)
 		p->keys[i + 1] = p->keys[i];
-	p->keys[index] = n->keys[t];
+	p->keys[index] = n->keys[middleindex];
 
 	p->keycount++;
 }
 
-void btree::BTree234::DeleteNode(Node * n, int key)
+void btree::BTree23::DeleteNode(Node * n, int key)
 {
 	if (n->isLeaf) {
 		int i = n->keycount - 1;
@@ -283,7 +284,7 @@ void btree::BTree234::DeleteNode(Node * n, int key)
 			i--;
 		}
 		
-		int t = BTREE_234_NODE_KEY_COUNT_HALF_CEIL;
+		int t = BTREE_23_NODE_KEY_COUNT_HALF_CEIL;
 
 		// find key in internal node
 		if (findinkey) {
@@ -385,7 +386,7 @@ void btree::BTree234::DeleteNode(Node * n, int key)
 	}
 }
 
-void btree::BTree234::MergeChildNode(Node *n, int index)
+void btree::BTree23::MergeChildNode(Node *n, int index)
 {
 	Node *mergenode = n->childs[index];
 	Node *bemergednode = n->childs[index + 1];

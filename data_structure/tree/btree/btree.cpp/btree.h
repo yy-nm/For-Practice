@@ -2,25 +2,25 @@
 #ifndef _BTREE_H_
 #define _BTREE_H_
 
-#define BTREE_234_NODE_KEY_COUNT 3
-#define BTREE_234_NODE_KEY_COUNT_HALF_CEIL 2
+#define BTREE_23_NODE_KEY_COUNT 3
+#define BTREE_23_NODE_KEY_COUNT_HALF_CEIL ((BTREE_23_NODE_KEY_COUNT + 1) / 2)
 
 
 namespace btree
 {
-	class BTree234 {
+	class BTree23 {
 
 	protected:
 		struct Node {
 			bool isLeaf;
-			int keys[BTREE_234_NODE_KEY_COUNT];
+			int keys[BTREE_23_NODE_KEY_COUNT];
 			int keycount;
-			struct Node *childs[BTREE_234_NODE_KEY_COUNT + 1];
+			struct Node *childs[BTREE_23_NODE_KEY_COUNT + 1];
 
 			Node() : isLeaf(false), keycount(0) {
-				for (int i = 0; i < BTREE_234_NODE_KEY_COUNT; i++)
+				for (int i = 0; i < BTREE_23_NODE_KEY_COUNT; i++)
 					keys[i] = 0;
-				for (int i = 0; i < BTREE_234_NODE_KEY_COUNT + 1; i++)
+				for (int i = 0; i < BTREE_23_NODE_KEY_COUNT + 1; i++)
 					childs[i] = nullptr;
 			}
 			~Node();
@@ -33,7 +33,7 @@ namespace btree
 
 
 	public:
-		static BTree234 *CreateEmptyTree();
+		static BTree23 *CreateEmptyTree();
 
 		bool Search(int key);
 		void Insert(int key);
@@ -42,8 +42,8 @@ namespace btree
 
 		void TraverseTree();
 	protected:
-		BTree234();
-		virtual ~BTree234();
+		BTree23();
+		virtual ~BTree23();
 
 		int FindMaxKey(Node *n);
 		int FindMinKey(Node *n);
