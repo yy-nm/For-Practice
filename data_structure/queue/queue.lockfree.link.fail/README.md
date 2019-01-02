@@ -1,0 +1,4 @@
+- This version of lockfree queue is fail.
+- only can guarantee push in multiple thread.
+- bacause of drawback of data structure design, it cannot be guarantee pop in multiple thread.
+- 
