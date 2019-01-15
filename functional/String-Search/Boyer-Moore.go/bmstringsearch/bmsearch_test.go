@@ -5,69 +5,69 @@ import "testing"
 func TestSearch(t *testing.T) {
 	testcase := []struct {
 		content, pat string
-		match        bool
+		match        int
 	}{
 		{
 			"ABCXXABCXXXABC",
 			"ABCXXXABC",
-			true,
+			5,
 		},
 		{
 			"ABCXXABCXXXABC",
 			"ABYXCDEYX",
-			false,
+			-1,
 		},
 		{
 			"",
 			"",
-			false,
+			-1,
 		},
 		{
 			content: "hello, world",
 			pat:     "dlrow ,olleh",
-			match:   false,
+			match:   -1,
 		},
 		{
 			"Hello world",
 			"Hello",
-			true,
+			0,
 		},
 		{
 			"Hello world",
 			"world",
-			true,
+			6,
 		},
 		{
 			"Hello world",
 			"o wo",
-			true,
+			4,
 		},
 		{
 			"Hello world",
 			"not",
-			false,
+			-1,
 		},
 		{
 			"svertices vertices",
 			"vertices",
-			true,
+			1,
 		},
 		{
 			"FFS :svertices :vertices",
 			":vertices",
-			true,
+			15,
 		},
 		{
 			"cabadccabcdab",
 			"ccabcdab",
-			true,
+			5,
 		},
 	}
 
 	for _, c := range testcase {
 		match := Search(c.content, c.pat)
 		if match != c.match {
-			t.Errorf("search(%q) in %q, result: %q, true is :%q", c.pat, c.content, match, c.match)
+			t.Errorf("search(%q) in %q, result: %v, true is :%v", c.pat, c.content, match, c.match)
 		}
 	}
 }

@@ -8,11 +8,11 @@ func max(l, r int) int {
 	}
 }
 
-func Search(content, pat string) bool {
+func Search(content, pat string) int {
 	patlen := len(pat)
 	conlen := len(content)
 	if patlen > conlen || patlen == 0 {
-		return false
+		return -1
 	}
 
 	// delta1
@@ -74,7 +74,7 @@ func Search(content, pat string) bool {
 		}
 
 		if indexp < 0 {
-			return true
+			return indexc + 1
 		}
 
 		d1 = delta1[content[indexc]]
@@ -84,5 +84,5 @@ func Search(content, pat string) bool {
 		indexp = patlen - 1
 	}
 
-	return false
+	return -1
 }
