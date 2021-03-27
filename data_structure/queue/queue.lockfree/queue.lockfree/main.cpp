@@ -11,7 +11,8 @@
 struct TestCase
 {
 	Queue<int> q;
-	std::atomic_int count;
+	std::atomic_int push_count;
+	std::atomic_int pop_count;
 };
 
 
@@ -21,27 +22,31 @@ void CurrencyPush(TestCase *tc, int count, int start)
 	for (int i = 0; i < count; i++) {
 		tc->q.push(i + start);
 	}
-	tc->count+= count;
+	tc->push_count += count;
 }
 
 void CurrencyPop(TestCase *tc, int count)
 {
-	for (int i = 0; i < count; i++) {
-		tc->q.pop();
+	int value;
+	int i = 0;
+	while (count > i) {
+		if (tc->q.pop(value)) {
+			i++;
+		}
 	}
-	tc->count -= count;
+	tc->pop_count += count;
 }
 
-
-int main()
+void test_1()
 {
-
 	TestCase tc;
-	int threadcount = 2;
+	int threadcount = 5;
 	int pushcountperthread = 1000000;
+	//int threadcount = 3;
+	//int pushcountperthread = 10000;
 	int realcount = 0;
 	int maxvalue = threadcount * pushcountperthread;
-	
+
 	/*
 	tc.count = 0;
 	// test case 1 multiple push
@@ -55,8 +60,6 @@ int main()
 
 	}
 
-	std::cout << tc.q.size() << std::endl;
-
 	realcount = 0;
 	while (tc.q.size() > 0) {
 		//std::cout << tc.q.front() << std::endl;
@@ -66,45 +69,70 @@ int main()
 		realcount++;
 	}
 
-	std::cout << realcount << std::endl;
 //	*/
 
-	tc.count = 0;
+	tc.push_count = 0;
 	// test case 2 multiple pop
 	for (int i = 0; i < threadcount; i++) {
 		std::thread t(CurrencyPush, &tc, pushcountperthread, i * pushcountperthread);
 		t.detach();
 	}
 
-	while (tc.count.load() < threadcount * pushcountperthread) {
+	while (tc.push_count.load() < maxvalue) {
 
 	}
-
-	std::cout << tc.q.size() << std::endl;
-	
-	/*
-	realcount = 0;
-	while (tc.q.size() > 0) {
-		tc.q.pop();
-		realcount++;
-	}
-	std::cout << realcount << std::endl;
-//	*/
 
 //	/*
+	tc.pop_count = 0;
 	for (int i = 0; i < threadcount; i++) {
 		std::thread t(CurrencyPop, &tc, pushcountperthread);
 		t.detach();
 	}
 
-	while (tc.count.load() != 0) {
+	while (tc.pop_count.load() < maxvalue) {
 
 	}
-//	*/
-	
-	std::cout << "OK!" << std::endl;
+	//	*/
+
+	std::cout << "test_1 OK!" << std::endl;
+}
 
 
+void test_2()
+{
+	TestCase tc;
+	int threadcount = 5;
+	int pushcountperthread = 1000000;
+	int realcount = 0;
+	int maxvalue = threadcount * pushcountperthread;
+
+	tc.push_count = 0;
+	for (int i = 0; i < threadcount; i++) {
+		std::thread t(CurrencyPush, &tc, pushcountperthread, i * pushcountperthread);
+		t.detach();
+	}
+
+	tc.pop_count = 0;
+	for (int i = 0; i < threadcount; i++) {
+		std::thread t(CurrencyPop, &tc, pushcountperthread);
+		t.detach();
+	}
+
+	while (tc.push_count.load() < maxvalue) {}
+	std::cout << "test_2 push OK!" << std::endl;
+
+	while (tc.pop_count.load() < maxvalue) {}
+	std::cout << "test_2 pop OK!" << std::endl;
+
+	std::cout << "test_2 OK!" << std::endl;
+}
+
+
+int main()
+{
+
+	test_1();
+	test_2();
 
 	return 0;
 }

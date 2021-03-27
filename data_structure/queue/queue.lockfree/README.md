@@ -1,0 +1,1 @@
+- this lock free queue only work in linux with g++
