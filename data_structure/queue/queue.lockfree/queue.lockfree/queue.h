@@ -7,10 +7,6 @@
 #include <memory>
 
 
-#define CAS(t, o, n) __sync_bool_compare_and_swap(t, o, n)
-#define FetchAndAdd(t, v) __sync_fetch_and_add(t, v)
-
-
 template<typename T>
 class Queue
 {
@@ -18,13 +14,13 @@ protected:
 	struct Node
 	{
 		T value;
-		struct Node* next;
-		size_t refcount;
+		volatile std::atomic<struct Node*> next;
+		std::atomic_size_t refcount;
 
 		Node() : next(nullptr), refcount(0) {}
 	};
-	struct Node* head;
-	struct Node* tail;
+	volatile std::atomic<struct Node*> head;
+	volatile std::atomic<struct Node*> tail;
 
 	static void GiveBack(struct Node* n) {
 		if (nullptr != n) {
@@ -37,23 +33,34 @@ protected:
 	}
 
 	void _push(struct Node *n) {
-		struct Node *t = nullptr;
-		struct Node *next = nullptr;
-
-		do {
-			t = tail;
-		} while (!CAS(&t->next, nullptr, n));
+		struct Node * t = nullptr;
+		struct Node * next = nullptr;
+		struct Node* null_p = nullptr;
+		size_t ref = 0;
 
 		while (true) {
-			t = tail;
-			next = t->next;
-			if (next == nullptr)
-				continue;
-			if (CAS(&tail, t, next))
+			t = tail.load();
+			next = t->next.load();
+			null_p = nullptr;
+			if (next == n)
 				break;
+			t->next.compare_exchange_weak(null_p, n);
 		}
 
-		FetchAndAdd(&n->refcount, 1);
+		while (true) {
+			t = tail.load();
+			next = t->next.load();
+			
+			if (next == nullptr)
+				continue;
+			if (tail.compare_exchange_weak(t, next)) {
+				ref = next->refcount.fetch_add(1);
+				if (ref + 1 == next->refcount)
+					break;
+			}
+		}
+
+		n->refcount.fetch_add(1);
 	}
 
 public:
@@ -91,24 +98,31 @@ public:
 		struct Node *n = nullptr;
 		struct Node *t = nullptr;
 		struct Node *h = nullptr;
+		struct Node *tmp = nullptr;
+		size_t ref = 0;
 
 		while (true)
 		{
-			t = tail;
-			h = head;
-			n = head->next;
-
+			h = head.load();
+			t = tail.load();
+			n = h->next.load();
+			
 			if (h == t)
 				return false;
 			if (n == nullptr)
 				return false;
-
-			if (CAS(&head, h, n)) {
-				break;
+			if (h != head)
+				continue;
+			tmp = h;
+			if (head.compare_exchange_weak(h, n)) {
+				ref = h->refcount.fetch_add(1);
+				if (ref + 1 == h->refcount && tmp == h)
+					break;
 			}
+
 		}
 
-		FetchAndAdd(&n->refcount, 1);
+		n->refcount.fetch_add(1);
 		result = std::move(n->value);
 
 		GiveBack(h);
